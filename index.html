@@ -19,16 +19,18 @@
     --shadow-lg: 0 22px 60px rgba(0,0,0,0.6);
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html { scroll-behavior:smooth; }
+  html { scroll-behavior:smooth; -webkit-overflow-scrolling:touch; }
   body {
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
     background:#f0ebe0; color:#1a1a1a;
     min-height:100dvh; overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:none;
   }
 
   /* 长征背景 贯穿全局 */
-  .global-bg { position:fixed; inset:0; z-index:0; pointer-events:none; }
-  .global-bg img { width:100%; height:100%; object-fit:cover; opacity:0.75; }
+  .global-bg { position:fixed; inset:0; z-index:0; pointer-events:none; will-change:transform; }
+  .global-bg img { width:100%; height:100%; object-fit:cover; opacity:0.75; transform:translateZ(0); }
   .global-bg::after {
     content:''; position:absolute; inset:0;
     background:linear-gradient(180deg, rgba(10,10,10,0.02) 0%, rgba(10,10,10,0.01) 30%, rgba(10,10,10,0.06) 60%, rgba(10,10,10,0.55) 100%);
@@ -80,10 +82,11 @@
     text-align:center;
     position:relative; z-index:1;
     background:rgba(255,255,255,0.58);
-    backdrop-filter:blur(20px);
-    -webkit-backdrop-filter:blur(20px);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
     border:0.5px solid rgba(255,255,255,0.5);
     box-shadow:0 4px 24px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.4);
+    transform:translateZ(0);
   }
   .alloc .box .k {
     font-size:10px;
@@ -109,12 +112,13 @@
   .burn-total-card {
     border-radius:28px;
     background:rgba(255,255,255,0.48);
-    backdrop-filter:blur(20px);
-    -webkit-backdrop-filter:blur(20px);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
     border:0.5px solid rgba(255,255,255,0.5);
     box-shadow:0 4px 24px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.35);
     padding:24px 20px;
     position:relative; z-index:1;
+    transform:translateZ(0);
   }
   .burn-total-card .total-label {
     font-size:12px; color:rgba(30,30,30,0.7); font-weight:500;
@@ -164,11 +168,12 @@
   .address-bar {
     margin-top:16px; border-radius:28px;
     background:rgba(255,255,255,0.42);
-    backdrop-filter:blur(16px);
-    -webkit-backdrop-filter:blur(16px);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
     padding:12px 16px; display:flex; justify-content:space-between; gap:10px; align-items:center;
     border:0.5px solid rgba(255,255,255,0.5);
     box-shadow:0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.3);
+    transform:translateZ(0);
   }
   .address-bar .tip {
     font-size:13px; color:rgba(30,30,30,0.8); line-height:1.5;
@@ -205,12 +210,13 @@
     margin-top:16px;
     display:grid; grid-template-columns:repeat(5,1fr); gap:6px;
     background:rgba(255,255,255,0.38);
-    backdrop-filter:blur(16px);
-    -webkit-backdrop-filter:blur(16px);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
     border-radius:28px; padding:8px;
     box-shadow:0 8px 24px rgba(0,0,0,0.08);
     border:0.5px solid rgba(255,255,255,0.45);
     position:relative; z-index:2;
+    transform:translateZ(0);
   }
   .tab {
     padding:12px 4px; text-align:center; border-radius:20px;
@@ -240,14 +246,15 @@
   /* ===== 通用卡片（浅色毛玻璃） ===== */
   .card {
     background:rgba(255,255,255,0.45);
-    backdrop-filter:blur(16px);
-    -webkit-backdrop-filter:blur(16px);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
     border-radius:24px;
     box-shadow:0 4px 20px rgba(0,0,0,0.06);
     padding:18px;
     margin-bottom:12px;
     position:relative; overflow:hidden;
     border:0.5px solid rgba(255,255,255,0.5);
+    transform:translateZ(0);
   }
   .card::before {
     content:''; position:absolute; top:0; left:0; right:0; height:1px;
@@ -269,10 +276,11 @@
   .burn-accent {
     position:relative; overflow:hidden;
     background:rgba(255,255,255,0.45);
-    backdrop-filter:blur(16px);
-    -webkit-backdrop-filter:blur(16px);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
     border:0.5px solid rgba(255,255,255,0.5);
     box-shadow:0 4px 20px rgba(0,0,0,0.06);
+    transform:translateZ(0);
   }
   .burn-accent::before {
     content:''; position:absolute; inset:auto -10% -34% -10%; height:120px;
@@ -324,7 +332,8 @@
     border:0.5px solid rgba(255,255,255,0.45);
     box-shadow:0 2px 8px rgba(0,0,0,0.05);
     position:relative; overflow:hidden;
-    transition:all .3s ease;
+    transition:border-color .3s ease;
+    transform:translateZ(0);
   }
   .row::before {
     content:''; position:absolute; top:0; left:0; right:0; height:1px;
@@ -357,6 +366,7 @@
     padding:16px; border-radius:24px; background:rgba(255,255,255,0.42);
     border:0.5px solid rgba(255,255,255,0.45); box-shadow:0 2px 8px rgba(0,0,0,0.05);
     text-align:center;
+    transform:translateZ(0);
   }
   .feature h4 { margin:10px 0 6px; font-size:15px; color:#1a1a1a; }
   .feature p { margin:0; color:rgba(30,30,30,0.7); font-size:12px; line-height:1.6; }
@@ -405,10 +415,11 @@
     background:rgba(255,255,255,0.55);
     border-radius:28px; box-shadow:0 12px 32px rgba(0,0,0,0.1);
     padding:10px 14px; display:flex; justify-content:space-between; gap:10px; align-items:center;
-    backdrop-filter:blur(16px);
-    -webkit-backdrop-filter:blur(16px);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
     border:0.5px solid rgba(255,255,255,0.5);
     z-index:1000;
+    transform:translateZ(0);
   }
   .footerbar .tip { font-size:11px; color:rgba(30,30,30,0.7); line-height:1.5; }
   .footerbar .tip .ok { color:#3d8b6f; }
