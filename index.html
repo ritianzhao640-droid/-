@@ -192,6 +192,24 @@
   .btn-light:hover { background:#2d6b52; }
   .pill { padding:9px 14px; font-size:12px; }
 
+  /* 领取按钮 */
+  .claim-btn {
+    padding:6px 14px; border-radius:10px; font-size:12px; font-weight:600;
+    border:0.5px solid rgba(61,139,111,0.4); background:rgba(61,139,111,0.1);
+    color:#3d8b6f; cursor:pointer; font-family:inherit;
+    transition:all .2s ease;
+    touch-action:manipulation;
+    -webkit-touch-callout:none;
+    user-select:none;
+  }
+  .claim-btn:hover:not(:disabled) { background:#3d8b6f; color:#fff; }
+  .claim-btn:disabled {
+    opacity:0.35; cursor:not-allowed; background:rgba(0,0,0,0.04);
+    color:rgba(30,30,30,0.4); border-color:rgba(30,30,30,0.1);
+  }
+  .claim-btn.claiming { animation:pulse 1.2s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+
   /* 刷新按钮 */
   .refresh-spin svg { animation:spin .7s linear infinite; }
   @keyframes spin { to{transform:rotate(360deg);} }
@@ -571,11 +589,29 @@
         </div>
         <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
           <span style="font-size:12px; color:rgba(30,30,30,0.65);">当前权重</span>
-          <span style="font-size:16px; font-weight:700; color:#3d8b6f; text-shadow:0 0 6px rgba(61,139,111,0.2);" id="my-weight">—</span>
+          <span style="font-size:16px; font-weight:700; color:#3d8b6f;" id="my-weight">—</span>
         </div>
-        <div style="display:flex; justify-content:space-between;">
-          <span style="font-size:12px; color:rgba(30,30,30,0.65);">待领取收益</span>
-          <span style="font-size:16px; font-weight:700; color:#a06028; text-shadow:0 0 6px rgba(198,123,60,0.2);"><span id="my-pending-reward">—</span> <span style="font-size:12px; color:rgba(30,30,30,0.65);">slisBNB</span></span>
+        <div style="height:0.5px; background:rgba(30,30,30,0.1); margin:10px 0;"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div>
+            <div style="font-size:11px; color:rgba(30,30,30,0.55);">日榜奖励</div>
+            <div style="font-size:14px; font-weight:700; color:#3d8b6f; margin-top:2px;"><span id="my-pending-daily">—</span> <span style="font-size:11px; color:rgba(30,30,30,0.55);">slisBNB</span></div>
+          </div>
+          <button class="claim-btn" id="btn-claim-daily" onclick="claimDailyReward()" disabled>领取</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div>
+            <div style="font-size:11px; color:rgba(30,30,30,0.55);">总榜奖励</div>
+            <div style="font-size:14px; font-weight:700; color:#a06028; margin-top:2px;"><span id="my-pending-weighted">—</span> <span style="font-size:11px; color:rgba(30,30,30,0.55);">slisBNB</span></div>
+          </div>
+          <button class="claim-btn" id="btn-claim-weighted" onclick="claimWeightedReward()" disabled>领取</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:11px; color:rgba(30,30,30,0.55);">邀请返佣</div>
+            <div style="font-size:14px; font-weight:700; color:#c24028; margin-top:2px;"><span id="my-pending-invite">—</span> <span style="font-size:11px; color:rgba(30,30,30,0.55);">币安长征</span></div>
+          </div>
+          <button class="claim-btn" id="btn-claim-invite" onclick="claimInviteReward()" disabled>领取</button>
         </div>
       </div>
     </div>
@@ -1006,7 +1042,20 @@ async function loadUserData() {
     // 燃烧页
     setText('my-burned', fmtInt(detail.selfBurned));
     setText('my-weight', fmtInt(detail.weight));
-    setText('my-pending-reward', fmt(detail.pendingTotal, 4));
+
+    // 三个待领取金额 + 按钮状态
+    const pd = detail.pendingDaily || ethers.BigNumber.from(0);
+    const pw = detail.pendingWeighted || ethers.BigNumber.from(0);
+    const pi = detail.pendingInvite || ethers.BigNumber.from(0);
+    setText('my-pending-daily', fmt(pd, 4));
+    setText('my-pending-weighted', fmt(pw, 4));
+    setText('my-pending-invite', fmt(pi, 4));
+    const btnDaily = document.getElementById('btn-claim-daily');
+    const btnWeighted = document.getElementById('btn-claim-weighted');
+    const btnInvite = document.getElementById('btn-claim-invite');
+    if (btnDaily) btnDaily.disabled = pd.lte(0);
+    if (btnWeighted) btnWeighted.disabled = pw.lte(0);
+    if (btnInvite) btnInvite.disabled = pi.lte(0);
 
     // 日榜
     setText('my-rank', '#—');
@@ -1174,6 +1223,66 @@ async function doBurn() {
   } catch (e) {
     console.error('doBurn', e);
     showToast('燃烧失败: ' + (e.message || e), 'error');
+  }
+}
+
+// ============ 领取日榜奖励 ============
+async function claimDailyReward() {
+  if (!walletConnected) { showToast('请先连接钱包', 'error'); return; }
+  const btn = document.getElementById('btn-claim-daily');
+  if (btn.disabled) return;
+  btn.classList.add('claiming');
+  try {
+    showToast('领取日榜奖励中…', 'info');
+    const tx = await burnDistributor.claimBurnRewardFor(userAddress);
+    await tx.wait();
+    showToast('日榜奖励领取成功！', 'success');
+    await loadUserData();
+  } catch (e) {
+    console.error('claimDailyReward', e);
+    showToast('领取失败: ' + (e.message || e), 'error');
+  } finally {
+    btn.classList.remove('claiming');
+  }
+}
+
+// ============ 领取总榜奖励 ============
+async function claimWeightedReward() {
+  if (!walletConnected) { showToast('请先连接钱包', 'error'); return; }
+  const btn = document.getElementById('btn-claim-weighted');
+  if (btn.disabled) return;
+  btn.classList.add('claiming');
+  try {
+    showToast('领取总榜奖励中…', 'info');
+    const tx = await vault.claimBurnReward();
+    await tx.wait();
+    showToast('总榜奖励领取成功！', 'success');
+    await loadUserData();
+  } catch (e) {
+    console.error('claimWeightedReward', e);
+    showToast('领取失败: ' + (e.message || e), 'error');
+  } finally {
+    btn.classList.remove('claiming');
+  }
+}
+
+// ============ 领取邀请返佣 ============
+async function claimInviteReward() {
+  if (!walletConnected) { showToast('请先连接钱包', 'error'); return; }
+  const btn = document.getElementById('btn-claim-invite');
+  if (btn.disabled) return;
+  btn.classList.add('claiming');
+  try {
+    showToast('领取邀请返佣中…', 'info');
+    const tx = await vault.claimInviteReward();
+    await tx.wait();
+    showToast('邀请返佣领取成功！', 'success');
+    await loadUserData();
+  } catch (e) {
+    console.error('claimInviteReward', e);
+    showToast('领取失败: ' + (e.message || e), 'error');
+  } finally {
+    btn.classList.remove('claiming');
   }
 }
 
