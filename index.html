@@ -212,30 +212,33 @@
 
   /* 首页领取按钮 */
   .reward-row { display:flex; gap:8px; }
-  .reward-btn {
-    flex:1; padding:12px 4px; border-radius:16px; text-align:center;
+  .reward-box {
+    flex:1; padding:10px 4px 8px; border-radius:14px; text-align:center;
     background:rgba(255,255,255,0.65);
     border:0.5px solid rgba(30,30,30,0.12);
     box-shadow:0 2px 8px rgba(0,0,0,0.06);
-    cursor:pointer; font-family:inherit;
     transition:all .2s ease;
+  }
+  .reward-claim-btn {
+    width:calc(100% - 16px); margin:0 8px; padding:5px 0; border-radius:8px;
+    border:0.5px solid rgba(61,139,111,0.4);
+    background:rgba(61,139,111,0.1); color:#3d8b6f;
+    font-size:11px; font-weight:600; font-family:inherit;
+    cursor:pointer; transition:all .2s ease;
     touch-action:manipulation;
     -webkit-touch-callout:none;
     user-select:none;
   }
-  .reward-btn:hover:not(:disabled) {
-    background:rgba(61,139,111,0.12);
-    border-color:rgba(61,139,111,0.4);
-    transform:translateY(-2px);
-    box-shadow:0 4px 14px rgba(61,139,111,0.15);
+  .reward-claim-btn:hover:not(:disabled) {
+    background:#3d8b6f; color:#fff;
+    box-shadow:0 2px 8px rgba(61,139,111,0.3);
   }
-  .reward-btn:disabled {
-    opacity:0.5; cursor:not-allowed;
-    background:rgba(255,255,255,0.35);
-    border-color:rgba(30,30,30,0.08);
-    box-shadow:0 1px 4px rgba(0,0,0,0.03);
+  .reward-claim-btn:disabled {
+    opacity:0.35; cursor:not-allowed;
+    background:rgba(0,0,0,0.04); color:rgba(30,30,30,0.35);
+    border-color:rgba(30,30,30,0.1);
   }
-  .reward-btn.claiming { animation:pulse 1.2s ease infinite; }
+  .reward-claim-btn.claiming { animation:pulse 1.2s ease infinite; }
 
   /* 刷新按钮 */
   .refresh-spin svg { animation:spin .7s linear infinite; }
@@ -558,21 +561,24 @@
       <div class="card" style="padding:12px;">
         <div style="font-size:12px; font-weight:600; color:#1a1a1a; margin-bottom:8px;">待领取奖励</div>
         <div class="reward-row">
-          <button class="reward-btn" id="home-btn-daily" onclick="claimDailyReward()" disabled>
+          <div class="reward-box">
             <div style="font-size:10px; color:rgba(30,30,30,0.55);">日榜</div>
-            <div style="font-size:14px; font-weight:700; color:#3d8b6f; margin-top:2px;"><span id="home-pending-daily">—</span></div>
-            <div style="font-size:9px; color:rgba(30,30,30,0.45);">slisBNB</div>
-          </button>
-          <button class="reward-btn" id="home-btn-weighted" onclick="claimWeightedReward()" disabled>
+            <div style="font-size:15px; font-weight:700; color:#3d8b6f; margin-top:2px;"><span id="home-pending-daily">—</span></div>
+            <div style="font-size:9px; color:rgba(30,30,30,0.45); margin-bottom:6px;">slisBNB</div>
+            <button class="reward-claim-btn" id="home-btn-daily" onclick="claimDailyReward()" disabled>领取</button>
+          </div>
+          <div class="reward-box">
             <div style="font-size:10px; color:rgba(30,30,30,0.55);">总榜</div>
-            <div style="font-size:14px; font-weight:700; color:#a06028; margin-top:2px;"><span id="home-pending-weighted">—</span></div>
-            <div style="font-size:9px; color:rgba(30,30,30,0.45);">slisBNB</div>
-          </button>
-          <button class="reward-btn" id="home-btn-invite" onclick="claimInviteReward()" disabled>
+            <div style="font-size:15px; font-weight:700; color:#a06028; margin-top:2px;"><span id="home-pending-weighted">—</span></div>
+            <div style="font-size:9px; color:rgba(30,30,30,0.45); margin-bottom:6px;">slisBNB</div>
+            <button class="reward-claim-btn" id="home-btn-weighted" onclick="claimWeightedReward()" disabled>领取</button>
+          </div>
+          <div class="reward-box">
             <div style="font-size:10px; color:rgba(30,30,30,0.55);">返佣</div>
-            <div style="font-size:14px; font-weight:700; color:#c24028; margin-top:2px;"><span id="home-pending-invite">—</span></div>
-            <div style="font-size:9px; color:rgba(30,30,30,0.45);">币安长征</div>
-          </button>
+            <div style="font-size:15px; font-weight:700; color:#c24028; margin-top:2px;"><span id="home-pending-invite">—</span></div>
+            <div style="font-size:9px; color:rgba(30,30,30,0.45); margin-bottom:6px;">币安长征</div>
+            <button class="reward-claim-btn" id="home-btn-invite" onclick="claimInviteReward()" disabled>领取</button>
+          </div>
         </div>
       </div>
     </div>
