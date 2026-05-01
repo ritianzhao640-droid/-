@@ -18,7 +18,7 @@
     --shadow: 0 16px 44px rgba(0,0,0,0.5);
     --shadow-lg: 0 22px 60px rgba(0,0,0,0.6);
   }
-  * { margin:0; padding:0; box-sizing:border-box; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html { scroll-behavior:smooth; }
   body {
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
@@ -178,6 +178,9 @@
   .btn, button {
     border:0; cursor:pointer; border-radius:999px; font-weight:600;
     transition:.18s ease; font-family:inherit;
+    touch-action:manipulation;
+    -webkit-touch-callout:none;
+    user-select:none;
   }
   .btn-dark {
     background:rgba(255,255,255,0.55); color:#444;
@@ -213,6 +216,9 @@
     padding:12px 4px; text-align:center; border-radius:20px;
     font-size:12px; color:rgba(30,30,30,0.7); background:transparent;
     white-space:nowrap; border:0; font-family:inherit; font-weight:600;
+    touch-action:manipulation;
+    -webkit-touch-callout:none;
+    user-select:none;
   }
   .tab.active {
     background:#3d8b6f; color:#fff;
@@ -301,8 +307,9 @@
 
   input {
     width:100%; height:48px; border:0; outline:none;
-    border-radius:18px; padding:0 14px; background:rgba(0,0,0,0.04); font-size:15px; color:#1a1a1a;
+    border-radius:18px; padding:0 14px; background:rgba(0,0,0,0.04); font-size:16px; color:#1a1a1a;
     border:0.5px solid rgba(255,255,255,0.4);
+    -webkit-tap-highlight-color:transparent;
   }
   input::placeholder { color:rgba(30,30,30,0.5); }
   .label { font-size:14px; color:rgba(30,30,30,0.7); margin-bottom:8px; }
@@ -324,6 +331,7 @@
     background:linear-gradient(90deg, transparent, rgba(61,139,111,0.12), transparent);
   }
   .row:hover { border-color:rgba(61,139,111,0.3); }
+  .row:active { transform:scale(0.98); }
   .row.white {
     background:rgba(255,255,255,0.55); box-shadow:0 8px 24px rgba(0,0,0,0.08);
   }
@@ -381,8 +389,12 @@
     padding:14px 4px; border-radius:18px; background:rgba(255,255,255,0.42);
     border:0.5px solid rgba(255,255,255,0.45); text-align:center;
     cursor:pointer; transition:all .3s; box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    touch-action:manipulation;
+    -webkit-touch-callout:none;
+    user-select:none;
   }
   .social-btn:hover { border-color:#3d8b6f; box-shadow:0 0 12px rgba(61,139,111,0.12); }
+  .social-btn:active { transform:scale(0.96); }
   .social-icon { font-size:22px; margin-bottom:4px; }
   .social-name { font-size:10px; color:rgba(30,30,30,0.65); }
 
@@ -1041,6 +1053,30 @@ async function toggleWallet() {
   if (!walletConnected) {
     if (!window.ethereum) { showToast('请安装 MetaMask', 'error'); return; }
     try {
+      // 强制切换到 BSC 主网
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x38' }], // BSC Mainnet chainId 56
+        });
+      } catch (switchError) {
+        // 如果网络未添加，尝试添加
+        if (switchError.code === 4902) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x38',
+              chainName: 'BSC Mainnet',
+              nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+              rpcUrls: ['https://bsc-dataseed.binance.org/'],
+              blockExplorerUrls: ['https://bscscan.com'],
+            }],
+          });
+        } else {
+          throw switchError;
+        }
+      }
+
       const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
       await web3Provider.send('eth_requestAccounts', []);
       signer = web3Provider.getSigner();
