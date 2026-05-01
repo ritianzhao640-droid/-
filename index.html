@@ -644,71 +644,6 @@
     </div>
 
     <div class="section">
-      <div class="title">专属链接</div>
-      <div class="desc">预设地址的专属邀请链接</div>
-      <div id="preset-links-list">
-        <div class="row" style="padding:12px 14px;">
-          <div class="row-left" style="min-width:0;">
-            <div class="rank-num" style="width:32px; height:32px; font-size:11px;">1</div>
-            <div style="min-width:0;">
-              <div class="row-title">0x7329···9988</div>
-              <div class="row-sub muted" style="font-size:11px;">https://bacz.io/?ref=0x7329Ae0bBB2801EFB95670F2794904f872399988</div>
-            </div>
-          </div>
-          <button class="btn-light pill" style="flex-shrink:0; font-size:11px; padding:7px 12px;" onclick="copyPresetLink('https://bacz.io/?ref=0x7329Ae0bBB2801EFB95670F2794904f872399988')">复制</button>
-        </div>
-        <div class="row" style="padding:12px 14px; margin-top:8px;">
-          <div class="row-left" style="min-width:0;">
-            <div class="rank-num" style="width:32px; height:32px; font-size:11px;">2</div>
-            <div style="min-width:0;">
-              <div class="row-title">0x61dc···9bde</div>
-              <div class="row-sub muted" style="font-size:11px;">https://bacz.io/?ref=0x61dcb5be16e60a10bd6556b4de08715d40209bde</div>
-            </div>
-          </div>
-          <button class="btn-light pill" style="flex-shrink:0; font-size:11px; padding:7px 12px;" onclick="copyPresetLink('https://bacz.io/?ref=0x61dcb5be16e60a10bd6556b4de08715d40209bde')">复制</button>
-        </div>
-        <div class="row" style="padding:12px 14px; margin-top:8px;">
-          <div class="row-left" style="min-width:0;">
-            <div class="rank-num" style="width:32px; height:32px; font-size:11px;">3</div>
-            <div style="min-width:0;">
-              <div class="row-title">0x54B1···785E</div>
-              <div class="row-sub muted" style="font-size:11px;">https://bacz.io/?ref=0x54B11b5E7F3540556b0C0Ec8103c14643b6B785E</div>
-            </div>
-          </div>
-          <button class="btn-light pill" style="flex-shrink:0; font-size:11px; padding:7px 12px;" onclick="copyPresetLink('https://bacz.io/?ref=0x54B11b5E7F3540556b0C0Ec8103c14643b6B785E')">复制</button>
-        </div>
-        <div class="row" style="padding:12px 14px; margin-top:8px;">
-          <div class="row-left" style="min-width:0;">
-            <div class="rank-num" style="width:32px; height:32px; font-size:11px;">4</div>
-            <div style="min-width:0;">
-              <div class="row-title">0xc01c···659d</div>
-              <div class="row-sub muted" style="font-size:11px;">https://bacz.io/?ref=0xc01c6f5c17229c01b42c3afc898ce4ffcb72659d</div>
-            </div>
-          </div>
-          <button class="btn-light pill" style="flex-shrink:0; font-size:11px; padding:7px 12px;" onclick="copyPresetLink('https://bacz.io/?ref=0xc01c6f5c17229c01b42c3afc898ce4ffcb72659d')">复制</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="title">生成专属链接</div>
-      <div class="desc">输入任意钱包地址，生成专属邀请链接</div>
-      <div class="card" style="padding:18px;">
-        <input type="text" id="gen-link-input" placeholder="输入钱包地址，例如 0x..." value=""
-          style="width:100%; height:46px; border-radius:14px; padding:0 14px; font-size:13px; color:#1a1a1a; background:rgba(255,255,255,0.5); border:0.5px solid rgba(255,255,255,0.6); outline:none; font-family:inherit;"
-          oninput="this.value = this.value.trim()">
-        <button class="btn-light pill" style="width:100%; margin-top:10px; height:42px; font-size:14px;" onclick="generateInviteLink()">生成链接</button>
-
-        <div id="gen-link-result" style="display:none; margin-top:14px; padding:14px; border-radius:16px; background:rgba(255,255,255,0.45); border:0.5px solid rgba(255,255,255,0.5); text-align:center;">
-          <div style="font-size:11px; color:rgba(30,30,30,0.55); margin-bottom:6px;">您的专属邀请链接</div>
-          <div style="font-size:18px; font-weight:700; color:#1a1a1a; letter-spacing:-0.02em; word-break:break-all; line-height:1.4;" id="gen-link-short">—</div>
-          <div style="font-size:11px; color:rgba(30,30,30,0.5); margin-top:6px; word-break:break-all;" id="gen-link-full">—</div>
-          <button class="btn-light pill" style="margin-top:10px;" onclick="copyGeneratedLink()">复制完整链接</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
       <div class="title">分润比例</div>
       <div class="row white">
         <div class="row-left">
@@ -819,6 +754,14 @@ let walletConnected = false;
 const BURN_GOAL = ethers.utils.parseUnits('1000000000', 18);
 const MILESTONE_STEP = ethers.utils.parseUnits('10000000', 18);
 const DEFAULT_INVITER = '0xf25635ec0f3ca460043d9f2abb49caacaa0328e6';
+
+// 短码邀请映射（后缀 → 完整地址）
+const INVITE_SHORT_MAP = {
+  '9988': '0x7329Ae0bBB2801EFB95670F2794904f872399988',
+  '9bde': '0x61dcb5be16e60a10bd6556b4de08715d40209bde',
+  '785E': '0x54B11b5E7F3540556b0C0Ec8103c14643b6B785E',
+  '659d': '0xc01c6f5c17229c01b42c3afc898ce4ffcb72659d',
+};
 
 // ============ 工具函数 ============
 function fmt(n, decimals=2) {
@@ -1083,13 +1026,6 @@ async function loadUserData() {
       if (inviterTip) inviterTip.textContent = '未绑定邀请关系的用户将使用默认地址，也可手动填写';
     }
 
-    // 自动生成链接：如果已连接钱包，自动填充并生成
-    const genInput = document.getElementById('gen-link-input');
-    if (genInput && !genInput.value) {
-      genInput.value = userAddress;
-      generateInviteLink();
-    }
-
     // 钱包状态
     const short = shortAddr(userAddress);
     setHTML('walletStatus', '已连接 · <span class="addr">' + short + '</span>');
@@ -1167,16 +1103,24 @@ async function doBurn() {
       showToast('授权成功', 'success');
     }
 
-    // 2. 执行燃烧
-    showToast('燃烧交易中…', 'info');
+    // 2. 确定邀请地址（优先级：手动填写 > 已绑定 > URL传入 > 默认地址）
     const inv = await router.burnInviter(VAULT_CONTRACT.address, userAddress);
-    // 已绑定用绑定的，未绑定用默认地址
-    let inviterAddr = inv.hasInviter ? inv.inviter : DEFAULT_INVITER;
-    // 如果用户手动填写了邀请地址且有效，优先使用手动填写的
     const manualInviter = document.getElementById('inviter-input').value.trim();
+    const urlInviter = localStorage.getItem('bacz_ref');
+
+    let inviterAddr;
     if (manualInviter && manualInviter.startsWith('0x') && manualInviter.length === 42) {
       inviterAddr = manualInviter;
+    } else if (inv.hasInviter) {
+      inviterAddr = inv.inviter;
+    } else if (urlInviter) {
+      inviterAddr = urlInviter;
+    } else {
+      inviterAddr = DEFAULT_INVITER;
     }
+
+    // 3. 执行燃烧
+    showToast('燃烧交易中…', 'info');
     const burnTx = await vault.burn(amount, inviterAddr);
     await burnTx.wait();
     showToast('燃烧成功！', 'success');
@@ -1201,38 +1145,28 @@ function copyInviteLink() {
   }
 }
 
-function copyPresetLink(url) {
-  navigator.clipboard.writeText(url).then(() => showToast('链接已复制', 'success'));
-}
-
-// ============ 生成专属链接 ============
-function generateInviteLink() {
-  const input = document.getElementById('gen-link-input');
-  const addr = input.value.trim();
-
-  if (!addr || !addr.startsWith('0x') || addr.length !== 42) {
-    showToast('请输入有效的钱包地址', 'error');
-    return;
-  }
-
-  const fullLink = 'https://bacz.io/?ref=' + addr;
-  const suffix = addr.slice(-4);
-  const shortDisplay = 'https://bacz.io/?ref=<span style="color:#3d8b6f;">0x</span>···<span style="color:#3d8b6f; font-weight:800;">' + suffix + '</span>';
-
-  document.getElementById('gen-link-short').innerHTML = shortDisplay;
-  document.getElementById('gen-link-full').textContent = fullLink;
-  document.getElementById('gen-link-result').style.display = 'block';
-}
-
-function copyGeneratedLink() {
-  const full = document.getElementById('gen-link-full').textContent;
-  if (full && full.startsWith('http')) {
-    navigator.clipboard.writeText(full).then(() => showToast('完整链接已复制', 'success'));
-  }
+// ============ URL 邀请参数解析 ============
+function resolveRefFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  if (!ref) return null;
+  // 完整地址直接使用
+  if (ref.startsWith('0x') && ref.length === 42) return ref.toLowerCase();
+  // 短码查表
+  const full = INVITE_SHORT_MAP[ref];
+  if (full) return full.toLowerCase();
+  return null;
 }
 
 // ============ 启动 ============
 window.addEventListener('DOMContentLoaded', async () => {
+  // 解析 URL 邀请参数
+  const urlRef = resolveRefFromUrl();
+  if (urlRef) {
+    localStorage.setItem('bacz_ref', urlRef);
+    console.log('Invite ref resolved:', urlRef);
+  }
+
   initReadContracts();
   await loadGlobalData();
 });
