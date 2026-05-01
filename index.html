@@ -1254,8 +1254,8 @@ async function doBurn() {
 // ============ 领取日榜奖励 ============
 async function claimDailyReward() {
   if (!walletConnected) { showToast('请先连接钱包', 'error'); return; }
-  const btn = document.getElementById('btn-claim-daily');
-  if (btn.disabled) return;
+  const btn = document.getElementById('home-btn-daily');
+  if (!btn || btn.disabled) return;
   btn.classList.add('claiming');
   try {
     showToast('领取日榜奖励中…', 'info');
@@ -1274,8 +1274,8 @@ async function claimDailyReward() {
 // ============ 领取总榜奖励 ============
 async function claimWeightedReward() {
   if (!walletConnected) { showToast('请先连接钱包', 'error'); return; }
-  const btn = document.getElementById('btn-claim-weighted');
-  if (btn.disabled) return;
+  const btn = document.getElementById('home-btn-weighted');
+  if (!btn || btn.disabled) return;
   btn.classList.add('claiming');
   try {
     showToast('领取总榜奖励中…', 'info');
@@ -1294,8 +1294,8 @@ async function claimWeightedReward() {
 // ============ 领取邀请返佣 ============
 async function claimInviteReward() {
   if (!walletConnected) { showToast('请先连接钱包', 'error'); return; }
-  const btn = document.getElementById('btn-claim-invite');
-  if (btn.disabled) return;
+  const btn = document.getElementById('home-btn-invite');
+  if (!btn || btn.disabled) return;
   btn.classList.add('claiming');
   try {
     showToast('领取邀请返佣中…', 'info');
