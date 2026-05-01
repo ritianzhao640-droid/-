@@ -106,57 +106,57 @@
 
   /* ===== 全服累积燃烧（浅色毛玻璃大卡片） ===== */
   .burn-total-card {
-    border-radius:22px;
+    border-radius:18px;
     background:rgba(255,255,255,0.55);
     border:0.5px solid rgba(255,255,255,0.5);
     box-shadow:0 2px 12px rgba(0,0,0,0.04);
-    padding:18px 14px;
+    padding:12px 12px 10px;
     position:relative; z-index:1;
     transform:translateZ(0);
   }
   .burn-total-card .total-label {
-    font-size:12px; color:rgba(30,30,30,0.7); font-weight:500;
-    display:flex; align-items:center; gap:6px; margin-bottom:8px;
+    font-size:11px; color:rgba(30,30,30,0.6); font-weight:500;
+    display:flex; align-items:center; gap:5px; margin-bottom:4px;
   }
   .burn-total-card .total-label::before {
-    content:''; display:inline-block; width:8px; height:8px; border-radius:50%;
+    content:''; display:inline-block; width:6px; height:6px; border-radius:50%;
     background:linear-gradient(180deg,#ff9a3d,#c24028);
-    box-shadow:0 0 10px rgba(194,64,40,0.4);
+    box-shadow:0 0 8px rgba(194,64,40,0.35);
   }
   .burn-total-card .total-num {
-    font-size:32px; font-weight:900; color:#1a1a1a;
-    letter-spacing:-0.04em; line-height:1; margin-bottom:12px;
+    font-size:28px; font-weight:900; color:#1a1a1a;
+    letter-spacing:-0.04em; line-height:1; margin-bottom:8px;
   }
   .burn-total-card .total-num .unit {
-    font-size:16px; font-weight:600; color:rgba(30,30,30,0.65); margin-left:4px;
+    font-size:13px; font-weight:600; color:rgba(30,30,30,0.6); margin-left:3px;
   }
-  .burn-progress-wrap { margin-bottom:16px; }
+  .burn-progress-wrap { margin-bottom:8px; }
   .burn-progress-bar {
-    height:10px; border-radius:999px;
+    height:6px; border-radius:999px;
     background:rgba(0,0,0,0.06);
     overflow:hidden; position:relative;
   }
   .burn-progress-fill {
     height:100%; border-radius:999px;
     background:linear-gradient(90deg,#ff9a3d 0%,#c24028 100%);
-    box-shadow:0 0 12px rgba(194,64,40,0.3);
+    box-shadow:0 0 8px rgba(194,64,40,0.25);
     transition:width 1s ease;
   }
   .burn-progress-info {
-    display:flex; justify-content:space-between; margin-top:8px;
-    font-size:11px; color:rgba(30,30,30,0.65);
+    display:flex; justify-content:space-between; margin-top:4px;
+    font-size:10px; color:rgba(30,30,30,0.55);
   }
   .burn-progress-info .next { color:#c24028; font-weight:700; }
-  .burn-mile-list { display:flex; flex-direction:column; gap:5px; }
+  .burn-mile-list { display:flex; flex-direction:column; gap:3px; }
   .burn-mile-item {
-    display:flex; align-items:center; gap:8px;
-    font-size:11px; color:rgba(30,30,30,0.85);
-    padding:5px 8px; border-radius:8px;
-    background:rgba(255,255,255,0.35);
+    display:flex; align-items:center; gap:6px;
+    font-size:10px; color:rgba(30,30,30,0.75);
+    padding:3px 6px; border-radius:6px;
+    background:rgba(255,255,255,0.3);
   }
-  .burn-mile-item .fire { font-size:12px; }
+  .burn-mile-item .fire { font-size:10px; }
   .burn-mile-item .mile { font-weight:700; color:#c24028; }
-  .burn-mile-item .time { margin-left:auto; font-size:10px; color:rgba(30,30,30,0.55); }
+  .burn-mile-item .time { margin-left:auto; font-size:9px; color:rgba(30,30,30,0.5); }
 
   /* ===== 操作栏（浅色毛玻璃地址栏） ===== */
   .address-bar {
@@ -211,9 +211,9 @@
   @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
 
   /* 首页领取按钮 */
-  .reward-row { display:flex; gap:8px; }
+  .reward-row { display:flex; gap:6px; }
   .reward-box {
-    flex:1; padding:10px 4px 8px; border-radius:14px; text-align:center;
+    flex:1; padding:8px 3px 6px; border-radius:12px; text-align:center;
     background:rgba(255,255,255,0.65);
     border:0.5px solid rgba(30,30,30,0.12);
     box-shadow:0 2px 8px rgba(0,0,0,0.06);
@@ -558,8 +558,8 @@
   <!-- 首页 -->
   <div class="page active" id="page-home">
     <div class="section">
-      <div class="card" style="padding:12px;">
-        <div style="font-size:12px; font-weight:600; color:#1a1a1a; margin-bottom:8px;">待领取奖励</div>
+      <div class="card" style="padding:10px 12px; margin-bottom:8px;">
+        <div style="font-size:11px; font-weight:600; color:#1a1a1a; margin-bottom:6px;">待领取奖励</div>
         <div class="reward-row">
           <div class="reward-box">
             <div style="font-size:10px; color:rgba(30,30,30,0.55);">日榜</div>
@@ -583,9 +583,11 @@
       </div>
     </div>
 
-    <div class="section">
-      <div class="title">全服累积燃烧</div>
-      <div class="desc">实时追踪全服燃烧进度与里程碑</div>
+    <div class="section" style="margin-top:8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <div class="title" style="margin:0;">全服累积燃烧</div>
+        <div style="font-size:10px; color:rgba(30,30,30,0.45);">实时追踪进度</div>
+      </div>
       <div class="burn-total-card">
         <div class="total-label">全服累计燃烧</div>
         <div class="total-num" id="global-burned">—</div>
@@ -924,15 +926,15 @@ async function loadGlobalData() {
     const nextMilestone = totalBurned.div(MILESTONE_STEP).add(1).mul(MILESTONE_STEP);
     setText('global-next-mile', '下一里程碑 ' + fmt(nextMilestone, 0));
 
-    // 里程碑列表
+    // 里程碑列表（只显示最近2条）
     const milestones = [];
     const currentMilestone = totalBurned.div(MILESTONE_STEP).mul(MILESTONE_STEP);
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       const m = currentMilestone.sub(MILESTONE_STEP.mul(i));
       if (m.gte(0)) milestones.push(fmt(m, 0));
     }
     setHTML('global-mile-list', milestones.map((m, i) =>
-      `<div class="burn-mile-item"><span class="fire">🔥</span> 突破 <span class="mile">${m}</span> <span class="time">${i===0?'刚刚':i===1?'今日':'昨日'}</span></div>`
+      `<div class="burn-mile-item"><span class="fire">🔥</span> 突破 <span class="mile">${m}</span> <span class="time">${i===0?'刚刚':'今日'}</span></div>`
     ).join(''));
 
     // Hero 金库数据
