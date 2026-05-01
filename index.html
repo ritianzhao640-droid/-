@@ -1165,6 +1165,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (urlRef) {
     localStorage.setItem('bacz_ref', urlRef);
     console.log('Invite ref resolved:', urlRef);
+    // 显示邀请来源提示
+    setTimeout(() => {
+      showToast('您通过 ' + shortAddr(urlRef) + ' 的邀请链接进入', 'info');
+    }, 800);
   }
 
   initReadContracts();
