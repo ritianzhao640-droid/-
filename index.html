@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
 <!-- 📋 contracts.js 包含所有合约地址、ABI 和网络配置 — 新代币发布时优先替换此文件 -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-<script src="contracts.js?v=2"></script>
+<script src="contracts.js?v=3"></script>
 <style>
   :root {
     --ink-900: #0a0a0a; --ink-800: #111111; --ink-700: #1a1a1a; --ink-600: #262626; --ink-500: #3a3a3a;
@@ -1356,6 +1356,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   // 解析 URL 邀请参数
   const urlRef = resolveRefFromUrl();
   if (urlRef) {
+    // 通过邀请链接进入 → 锁定该邀请人
     localStorage.setItem('bacz_ref', urlRef);
     localStorage.setItem('bacz_ref_locked', '1');
     console.log('Invite ref resolved (locked):', urlRef);
@@ -1363,6 +1364,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => {
       showToast('您通过 ' + shortAddr(urlRef) + ' 的邀请链接进入', 'info');
     }, 800);
+  } else {
+    // 直接访问官网（无 ref 参数）→ 清除之前的锁定状态
+    localStorage.removeItem('bacz_ref_locked');
+    localStorage.removeItem('bacz_ref');
+    console.log('Direct access: cleared locked ref');
   }
 
   initReadContracts();
