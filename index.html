@@ -815,6 +815,7 @@ const INVITE_SHORT_MAP = {
   '9bde': '0x61dcb5be16e60a10bd6556b4de08715d40209bde',
   '785E': '0x54B11b5E7F3540556b0C0Ec8103c14643b6B785E',
   '659d': '0xc01c6f5c17229c01b42c3afc898ce4ffcb72659d',
+  '5915': '0x3265d4c420dd29bb0db5b05fb502065728325915',
 };
 
 // ============ 工具函数 ============
@@ -1083,7 +1084,14 @@ async function loadUserData() {
     const inviterDisplay = document.getElementById('inviter-display');
     const inviterInput = document.getElementById('inviter-input');
     const inviterTip = document.getElementById('inviter-tip');
-    if (inv.hasInviter) {
+    const lockedRef = localStorage.getItem('bacz_ref_locked') === '1' ? localStorage.getItem('bacz_ref') : null;
+
+    if (lockedRef) {
+      // 通过邀请链接进入 → 强制锁定，不可更改
+      if (inviterDisplay) { inviterDisplay.textContent = '链接邀请人：' + shortAddr(lockedRef); inviterDisplay.style.color = '#c24028'; inviterDisplay.style.display = 'block'; }
+      if (inviterInput) { inviterInput.style.display = 'none'; }
+      if (inviterTip) inviterTip.textContent = '您通过邀请链接进入，燃烧将强制使用该邀请地址，不可更改';
+    } else if (inv.hasInviter) {
       if (inviterDisplay) { inviterDisplay.textContent = '已绑定地址：' + shortAddr(inv.inviter); inviterDisplay.style.color = '#3d8b6f'; inviterDisplay.style.display = 'block'; }
       if (inviterInput) inviterInput.style.display = 'none';
       if (inviterTip) inviterTip.textContent = '您已绑定邀请关系，燃烧将使用已绑定的地址';
@@ -1192,13 +1200,16 @@ async function doBurn() {
       showToast('授权成功', 'success');
     }
 
-    // 2. 确定邀请地址（优先级：手动填写 > 已绑定 > URL传入 > 默认地址）
+    // 2. 确定邀请地址（优先级：锁定链接 > 手动填写 > 已绑定 > URL传入 > 默认地址）
     const inv = await router.burnInviter(VAULT_CONTRACT.address, userAddress);
+    const lockedRef = localStorage.getItem('bacz_ref_locked') === '1' ? localStorage.getItem('bacz_ref') : null;
     const manualInviter = document.getElementById('inviter-input').value.trim();
     const urlInviter = localStorage.getItem('bacz_ref');
 
     let inviterAddr;
-    if (manualInviter && manualInviter.startsWith('0x') && manualInviter.length === 42) {
+    if (lockedRef) {
+      inviterAddr = lockedRef;
+    } else if (manualInviter && manualInviter.startsWith('0x') && manualInviter.length === 42) {
       inviterAddr = manualInviter;
     } else if (inv.hasInviter) {
       inviterAddr = inv.inviter;
@@ -1335,7 +1346,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   const urlRef = resolveRefFromUrl();
   if (urlRef) {
     localStorage.setItem('bacz_ref', urlRef);
-    console.log('Invite ref resolved:', urlRef);
+    localStorage.setItem('bacz_ref_locked', '1');
+    console.log('Invite ref resolved (locked):', urlRef);
     // 显示邀请来源提示
     setTimeout(() => {
       showToast('您通过 ' + shortAddr(urlRef) + ' 的邀请链接进入', 'info');
