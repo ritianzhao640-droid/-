@@ -988,8 +988,9 @@ async function loadGlobalData() {
     setText('hero-staked-bnb', fmt(ov._totalStakedBnb, 4));
     setText('hero-slis-total', fmt(ov._vaultSlisBalance, 4));
 
-    // 日榜期数
-    setText('board-day-id', dayId.toString());
+    // 日榜期数：20574 → 第一期，20575 → 第二期
+    const displayRound = dayId.sub(20573).toString();
+    setText('board-day-id', displayRound);
 
     // 倒计时
     const nextDayEnd = dayId.add(1).mul(dayDur);
@@ -1086,7 +1087,7 @@ async function loadHistoryBoards(currentDayId) {
 
         html += `<div class="card" style="padding:14px 16px; margin-bottom:10px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span style="font-size:13px; font-weight:700; color:#1a1a1a;">第 ${dayId} 期</span>
+            <span style="font-size:13px; font-weight:700; color:#1a1a1a;">第 ${dayId - 20573} 期</span>
             <span style="font-size:11px; color:rgba(30,30,30,0.6);">${bd.finalized ? '已结算' : '进行中'}</span>
           </div>
           <div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(30,30,30,0.6); margin-bottom:8px;">
