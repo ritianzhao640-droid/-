@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>币安长征</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script src="contracts.js"></script>
 <style>
   :root {
     --ink-900: #0a0a0a; --ink-800: #111111; --ink-700: #1a1a1a; --ink-600: #262626; --ink-500: #3a3a3a;
@@ -448,27 +450,27 @@
       <div class="alloc">
         <div class="box">
           <div class="k">总 BNB 金库</div>
-          <div class="v">12,580</div>
+          <div class="v" id="hero-vault-bnb">—</div>
         </div>
         <div class="box">
           <div class="k">已质押 BNB</div>
-          <div class="v">9,840</div>
+          <div class="v" id="hero-staked-bnb">—</div>
         </div>
         <div class="box">
           <div class="k">已累积 slisBNB</div>
-          <div class="v">486.2</div>
+          <div class="v" id="hero-slis-total">—</div>
         </div>
         <div class="box">
           <div class="k">待领取 slisBNB</div>
-          <div class="v">12.45</div>
+          <div class="v" id="hero-slis-pending">—</div>
         </div>
         <div class="box">
           <div class="k">待领取币安长征</div>
-          <div class="v burn">3,200</div>
+          <div class="v burn" id="hero-bacz-pending">—</div>
         </div>
         <div class="box">
           <div class="k">已燃烧币安长征</div>
-          <div class="v burn">85,400</div>
+          <div class="v burn" id="hero-bacz-burned">—</div>
         </div>
       </div>
 
@@ -506,20 +508,18 @@
       <div class="desc">实时追踪全服燃烧进度与里程碑</div>
       <div class="burn-total-card">
         <div class="total-label">全服累计燃烧</div>
-        <div class="total-num">125,800,000<span class="unit">币安长征</span></div>
+        <div class="total-num" id="global-burned">—</div>
         <div class="burn-progress-wrap">
           <div class="burn-progress-bar">
-            <div class="burn-progress-fill" style="width:12.58%;"></div>
+            <div class="burn-progress-fill" id="global-progress" style="width:0%;"></div>
           </div>
           <div class="burn-progress-info">
-            <span>已燃烧 1.258亿 / 目标 10亿</span>
-            <span class="next">下一里程碑 1.3亿</span>
+            <span id="global-progress-text">加载中…</span>
+            <span class="next" id="global-next-mile">—</span>
           </div>
         </div>
-        <div class="burn-mile-list">
-          <div class="burn-mile-item"><span class="fire">🔥</span> 突破 <span class="mile">1.2 亿</span> <span class="time">今日 11:30</span></div>
-          <div class="burn-mile-item"><span class="fire">🔥</span> 突破 <span class="mile">1.1 亿</span> <span class="time">今日 09:15</span></div>
-          <div class="burn-mile-item"><span class="fire">🔥</span> 突破 <span class="mile">1.0 亿</span> <span class="time">昨日 22:40</span></div>
+        <div class="burn-mile-list" id="global-mile-list">
+          <div class="burn-mile-item" style="opacity:0.5;">加载里程碑中…</div>
         </div>
       </div>
     </div>
@@ -544,7 +544,7 @@
           <button onclick="setBurn(10000)" style="flex:1; padding:8px; border-radius:10px; background:rgba(255,255,255,0.35); border:0.5px solid rgba(255,255,255,0.4); font-size:11px; color:rgba(30,30,30,0.7); cursor:pointer; font-family:inherit; font-weight:600;">10,000</button>
           <button onclick="setBurn(50000)" style="flex:1; padding:8px; border-radius:10px; background:rgba(255,255,255,0.35); border:0.5px solid rgba(255,255,255,0.4); font-size:11px; color:rgba(30,30,30,0.7); cursor:pointer; font-family:inherit; font-weight:600;">50,000</button>
         </div>
-        <button class="bigbtn" style="margin-top:14px;">确认燃烧</button>
+        <button class="bigbtn" style="margin-top:14px;" id="burnBtn" onclick="doBurn()">确认燃烧</button>
       </div>
     </div>
 
@@ -553,15 +553,15 @@
       <div class="card">
         <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
           <span style="font-size:12px; color:rgba(30,30,30,0.65);">累计燃烧</span>
-          <span style="font-size:16px; font-weight:700; color:#1a1a1a;">85,400 <span style="font-size:12px; color:rgba(30,30,30,0.65);">币安长征</span></span>
+          <span style="font-size:16px; font-weight:700; color:#1a1a1a;"><span id="my-burned">—</span> <span style="font-size:12px; color:rgba(30,30,30,0.65);">币安长征</span></span>
         </div>
         <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
           <span style="font-size:12px; color:rgba(30,30,30,0.65);">当前权重</span>
-          <span style="font-size:16px; font-weight:700; color:#3d8b6f; text-shadow:0 0 6px rgba(61,139,111,0.2);">12,380</span>
+          <span style="font-size:16px; font-weight:700; color:#3d8b6f; text-shadow:0 0 6px rgba(61,139,111,0.2);" id="my-weight">—</span>
         </div>
         <div style="display:flex; justify-content:space-between;">
           <span style="font-size:12px; color:rgba(30,30,30,0.65);">待领取收益</span>
-          <span style="font-size:16px; font-weight:700; color:#a06028; text-shadow:0 0 6px rgba(198,123,60,0.2);">1,240 <span style="font-size:12px; color:rgba(30,30,30,0.65);">slisBNB</span></span>
+          <span style="font-size:16px; font-weight:700; color:#a06028; text-shadow:0 0 6px rgba(198,123,60,0.2);"><span id="my-pending-reward">—</span> <span style="font-size:12px; color:rgba(30,30,30,0.65);">slisBNB</span></span>
         </div>
       </div>
     </div>
@@ -572,107 +572,20 @@
     <div class="section">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <div class="title" style="margin:0;">烽火日榜</div>
-        <div style="font-size:12px; color:rgba(30,30,30,0.65);">第 <span style="color:#3d8b6f; font-weight:700;">48</span> 日 · 距结算 <span style="color:#3d8b6f; font-weight:700;">05:42:18</span></div>
+        <div style="font-size:12px; color:rgba(30,30,30,0.65);">第 <span style="color:#3d8b6f; font-weight:700;" id="board-day-id">—</span> 日 · 距结算 <span style="color:#3d8b6f; font-weight:700;" id="board-countdown">—</span></div>
       </div>
 
-      <div class="list">
-        <div class="row top1">
-          <div class="row-left">
-            <div class="rank-num">1</div>
-            <div>
-              <div class="row-title">0x7a23...f4a1</div>
-              <div class="row-sub muted">冠军</div>
-            </div>
-          </div>
-          <div class="right">
-            <div class="v">128,000</div>
-            <div class="small muted">币安长征</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-left">
-            <div class="rank-num" style="background:linear-gradient(135deg,#c0c0c0,#a0a0a0);color:#111;">2</div>
-            <div>
-              <div class="row-title">0x9b45...e2c3</div>
-              <div class="row-sub muted">亚军</div>
-            </div>
-          </div>
-          <div class="right">
-            <div class="v">96,500</div>
-            <div class="small muted">币安长征</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-left">
-            <div class="rank-num" style="background:linear-gradient(135deg,#cd7f32,#a06020);color:#1a1005;">3</div>
-            <div>
-              <div class="row-title">0x3c78...a9d2</div>
-              <div class="row-sub muted">季军</div>
-            </div>
-          </div>
-          <div class="right">
-            <div class="v">82,100</div>
-            <div class="small muted">币安长征</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-left">
-            <div class="rank-num">4</div>
-            <div><div class="row-title">0x1f56...b8e4</div></div>
-          </div>
-          <div class="right"><div class="v">71,200</div></div>
-        </div>
-        <div class="row">
-          <div class="row-left">
-            <div class="rank-num">5</div>
-            <div><div class="row-title">0x8d92...c7f1</div></div>
-          </div>
-          <div class="right"><div class="v">65,800</div></div>
-        </div>
-        <div class="row">
-          <div class="row-left">
-            <div class="rank-num">6</div>
-            <div><div class="row-title">0x4e31...d5a0</div></div>
-          </div>
-          <div class="right"><div class="v">54,300</div></div>
-        </div>
-        <div class="row">
-          <div class="row-left">
-            <div class="rank-num">7</div>
-            <div><div class="row-title">0x6a78...e3b9</div></div>
-          </div>
-          <div class="right"><div class="v">48,900</div></div>
-        </div>
-        <div class="row">
-          <div class="row-left">
-            <div class="rank-num">8</div>
-            <div><div class="row-title">0x2b45...f1c8</div></div>
-          </div>
-          <div class="right"><div class="v">42,000</div></div>
-        </div>
-        <div class="row">
-          <div class="row-left">
-            <div class="rank-num">9</div>
-            <div><div class="row-title">0x5c12...a7d6</div></div>
-          </div>
-          <div class="right"><div class="v">38,500</div></div>
-        </div>
-        <div class="row">
-          <div class="row-left">
-            <div class="rank-num">10</div>
-            <div><div class="row-title">0x9e34...b2e5</div></div>
-          </div>
-          <div class="right"><div class="v">31,200</div></div>
-        </div>
+      <div class="list" id="board-list">
+        <div class="row" style="opacity:0.5;"><div class="row-left">加载日榜中…</div></div>
       </div>
 
       <div class="card" style="margin-top:16px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
           <span style="font-size:14px; font-weight:600; color:#1a1a1a;">我的排名</span>
-          <span style="font-size:20px; font-weight:700; color:#3d8b6f; text-shadow:0 0 8px rgba(61,139,111,0.2);">#12</span>
+          <span style="font-size:20px; font-weight:700; color:#3d8b6f; text-shadow:0 0 8px rgba(61,139,111,0.2);" id="my-rank">—</span>
         </div>
-        <div style="font-size:12px; color:rgba(30,30,30,0.65); margin-bottom:4px;">今日燃烧 28,500 币安长征，距第10名差距 2,700</div>
-        <div style="font-size:12px; color:#a06028;">预估奖励 ~85 slisBNB</div>
+        <div style="font-size:12px; color:rgba(30,30,30,0.65); margin-bottom:4px;" id="my-rank-info">连接钱包后查看</div>
+        <div style="font-size:12px; color:#a06028;" id="my-rank-reward">—</div>
       </div>
     </div>
   </div>
@@ -684,28 +597,28 @@
       <div class="desc">邀请战友加入，获取 L1 10% / L2 5% 分润</div>
       <div class="card">
         <div class="invite-link-box">
-          <div class="invite-link">https://bacz.io/?ref=0xA1B2...C3D4</div>
-          <button class="btn-light pill" onclick="showToast('链接已复制', 'success')">复制</button>
+          <div class="invite-link" id="invite-link">连接钱包后生成邀请链接</div>
+          <button class="btn-light pill" onclick="copyInviteLink()">复制</button>
         </div>
       </div>
       <div class="feature-grid" style="margin-top:12px;">
         <div class="feature">
-          <div class="big">18</div>
+          <div class="big" id="l1-count">—</div>
           <h4>L1 战友</h4>
           <p>直接邀请</p>
         </div>
         <div class="feature">
-          <div class="big" style="color:#a06028; text-shadow:0 0 8px rgba(198,123,60,0.2);">64</div>
+          <div class="big" style="color:#a06028; text-shadow:0 0 8px rgba(198,123,60,0.2);" id="l2-count">—</div>
           <h4>L2 战友</h4>
           <p>间接邀请</p>
         </div>
         <div class="feature">
-          <div class="big">8,420</div>
+          <div class="big" id="l1-reward">—</div>
           <h4>L1 累计收益</h4>
           <p>币安长征</p>
         </div>
         <div class="feature">
-          <div class="big" style="color:#a06028; text-shadow:0 0 8px rgba(198,123,60,0.2);">3,180</div>
+          <div class="big" style="color:#a06028; text-shadow:0 0 8px rgba(198,123,60,0.2);" id="l2-reward">—</div>
           <h4>L2 累计收益</h4>
           <p>币安长征</p>
         </div>
@@ -761,19 +674,19 @@
         <div class="grid2" style="gap:16px;">
           <div>
             <div class="small">持有者</div>
-            <div class="num" style="font-size:20px; font-weight:700; color:#3d8b6f; text-shadow:0 0 6px rgba(61,139,111,0.2);">12,480</div>
+            <div class="num" style="font-size:20px; font-weight:700; color:#3d8b6f; text-shadow:0 0 6px rgba(61,139,111,0.2);" id="community-holders">—</div>
           </div>
           <div>
             <div class="small">日活燃烧</div>
-            <div class="num" style="font-size:20px; font-weight:700; color:#a06028; text-shadow:0 0 6px rgba(198,123,60,0.2);">1,850</div>
+            <div class="num" style="font-size:20px; font-weight:700; color:#a06028; text-shadow:0 0 6px rgba(198,123,60,0.2);" id="community-daily-burn">—</div>
           </div>
           <div>
             <div class="small">邀请关系</div>
-            <div class="num" style="font-size:20px; font-weight:700; color:#1a1a1a;">8,920</div>
+            <div class="num" style="font-size:20px; font-weight:700; color:#1a1a1a;" id="community-invites">—</div>
           </div>
           <div>
             <div class="small">治理提案</div>
-            <div class="num" style="font-size:20px; font-weight:700; color:#1a1a1a;">24</div>
+            <div class="num" style="font-size:20px; font-weight:700; color:#1a1a1a;" id="community-proposals">—</div>
           </div>
         </div>
       </div>
@@ -793,7 +706,41 @@
 </div>
 
 <script>
-// 页面切换
+// ============ 全局状态 ============
+let provider, signer, userAddress;
+let token, vault, burnDistributor, router;
+let readProvider;
+let walletConnected = false;
+const BURN_GOAL = ethers.utils.parseUnits('1000000000', 18);
+const MILESTONE_STEP = ethers.utils.parseUnits('10000000', 18);
+
+// ============ 工具函数 ============
+function fmt(n, decimals=2) {
+  if (!n) return '0';
+  const s = ethers.utils.formatUnits(n, 18);
+  const num = parseFloat(s);
+  if (num >= 1e9) return (num / 1e9).toFixed(decimals) + '亿';
+  if (num >= 1e4) return num.toLocaleString('en-US', {maximumFractionDigits: decimals});
+  return num.toFixed(decimals);
+}
+function fmtInt(n) {
+  if (!n) return '0';
+  const num = parseFloat(ethers.utils.formatUnits(n, 18));
+  return Math.floor(num).toLocaleString('en-US');
+}
+function shortAddr(a) {
+  return a ? a.slice(0,6) + '...' + a.slice(-4) : '—';
+}
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+function setHTML(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html;
+}
+
+// ============ 页面切换 ============
 function setBurn(v) {
   document.getElementById('burnAmount').value = v;
 }
@@ -806,15 +753,7 @@ function switchTab(id, el) {
   window.scrollTo(0,0);
 }
 
-// 刷新功能
-function handleRefresh() {
-  const btn = document.getElementById('refreshBtn');
-  btn.classList.add('refresh-spin');
-  setTimeout(() => btn.classList.remove('refresh-spin'), 700);
-  showToast('链上数据已刷新', 'success');
-}
-
-// Toast
+// ============ Toast ============
 function showToast(msg, type) {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
@@ -824,29 +763,260 @@ function showToast(msg, type) {
   setTimeout(() => toast.remove(), 2600);
 }
 
-// 钱包切换
-let walletConnected = false;
-function toggleWallet() {
-  const btn = document.getElementById('walletBtn');
-  const status = document.getElementById('walletStatus');
-  const footer = document.getElementById('footerStatus');
-  if(!walletConnected) {
-    walletConnected = true;
-    btn.textContent = '断开';
-    btn.classList.remove('btn-light');
-    btn.classList.add('btn-dark');
-    status.innerHTML = '已连接 · <span class="addr">0xA1B2...C3D4</span>';
-    footer.innerHTML = '<span class="ok">已连接</span> · 合约安全检测通过';
-    showToast('钱包已连接', 'success');
+// ============ 初始化合约（只读） ============
+function initReadContracts() {
+  readProvider = new ethers.providers.JsonRpcProvider(NETWORK.rpcUrl);
+  token = new ethers.Contract(TOKEN_CONTRACT.address, TOKEN_CONTRACT.abi, readProvider);
+  vault = new ethers.Contract(VAULT_CONTRACT.address, VAULT_CONTRACT.abi, readProvider);
+  burnDistributor = new ethers.Contract(BURN_CONTRACT.address, BURN_CONTRACT.abi, readProvider);
+  router = new ethers.Contract(ROUTER_CONTRACT.address, ROUTER_CONTRACT.abi, readProvider);
+}
+
+// ============ 初始化合约（写入） ============
+function initWriteContracts() {
+  token = new ethers.Contract(TOKEN_CONTRACT.address, TOKEN_CONTRACT.abi, signer);
+  vault = new ethers.Contract(VAULT_CONTRACT.address, VAULT_CONTRACT.abi, signer);
+  burnDistributor = new ethers.Contract(BURN_CONTRACT.address, BURN_CONTRACT.abi, signer);
+  router = new ethers.Contract(ROUTER_CONTRACT.address, ROUTER_CONTRACT.abi, signer);
+}
+
+// ============ 读取全局公开数据 ============
+async function loadGlobalData() {
+  try {
+    const [totalBurned, ov, dayId, dayDur] = await Promise.all([
+      burnDistributor.totalActualBurned(),
+      vault.overview(),
+      burnDistributor.currentDayId(),
+      burnDistributor.dayDuration(),
+    ]);
+
+    // 全服燃烧
+    setHTML('global-burned', fmtInt(totalBurned) + '<span class="unit">币安长征</span>');
+    const progress = totalBurned.mul(10000).div(BURN_GOAL).toNumber() / 100;
+    document.getElementById('global-progress').style.width = Math.min(progress, 100) + '%';
+    setText('global-progress-text', '已燃烧 ' + fmt(totalBurned, 4) + ' / 目标 10亿');
+
+    const nextMilestone = totalBurned.div(MILESTONE_STEP).add(1).mul(MILESTONE_STEP);
+    setText('global-next-mile', '下一里程碑 ' + fmt(nextMilestone, 0));
+
+    // 里程碑列表
+    const milestones = [];
+    const currentMilestone = totalBurned.div(MILESTONE_STEP).mul(MILESTONE_STEP);
+    for (let i = 0; i < 3; i++) {
+      const m = currentMilestone.sub(MILESTONE_STEP.mul(i));
+      if (m.gte(0)) milestones.push(fmt(m, 0));
+    }
+    setHTML('global-mile-list', milestones.map((m, i) =>
+      `<div class="burn-mile-item"><span class="fire">🔥</span> 突破 <span class="mile">${m}</span> <span class="time">${i===0?'刚刚':i===1?'今日':'昨日'}</span></div>`
+    ).join(''));
+
+    // Hero 金库数据
+    setText('hero-vault-bnb', fmt(ov._vaultBnbBalance, 4));
+    setText('hero-staked-bnb', fmt(ov._totalStakedBnb, 4));
+    setText('hero-slis-total', fmt(ov._vaultSlisBalance, 4));
+
+    // 日榜期数
+    setText('board-day-id', dayId.toString());
+
+    // 倒计时
+    const nextDayEnd = dayId.add(1).mul(dayDur);
+    updateCountdown(nextDayEnd);
+    setInterval(() => updateCountdown(nextDayEnd), 1000);
+
+    // 加载日榜
+    await loadDailyBoard(dayId);
+
+    // 社区数据
+    setText('community-daily-burn', fmtInt(totalBurned));
+
+  } catch (e) {
+    console.error('loadGlobalData', e);
+  }
+}
+
+function updateCountdown(nextDayEnd) {
+  const now = Math.floor(Date.now() / 1000);
+  const left = nextDayEnd.toNumber() - now;
+  if (left <= 0) { setText('board-countdown', '结算中'); return; }
+  const h = String(Math.floor(left / 3600)).padStart(2, '0');
+  const m = String(Math.floor((left % 3600) / 60)).padStart(2, '0');
+  const s = String(left % 60).padStart(2, '0');
+  setText('board-countdown', h + ':' + m + ':' + s);
+}
+
+// ============ 日榜 ============
+async function loadDailyBoard(dayId) {
+  try {
+    const bd = await router.burnDay(VAULT_CONTRACT.address, dayId);
+    const list = document.getElementById('board-list');
+    let html = '';
+    for (let i = 0; i < 10; i++) {
+      const addr = bd.users[i];
+      const amt = bd.amounts[i];
+      if (addr === ethers.constants.AddressZero) break;
+      const rankClass = i === 0 ? 'row top1' : 'row';
+      const rankStyle = i === 1 ? 'style="background:linear-gradient(135deg,#c0c0c0,#a0a0a0);color:#111;"' :
+                        i === 2 ? 'style="background:linear-gradient(135deg,#cd7f32,#a06020);color:#1a1005;"' : '';
+      const label = i === 0 ? '冠军' : i === 1 ? '亚军' : i === 2 ? '季军' : '';
+      html += `<div class="${rankClass}">
+        <div class="row-left">
+          <div class="rank-num" ${rankStyle}>${i+1}</div>
+          <div>
+            <div class="row-title">${shortAddr(addr)}</div>
+            ${label ? `<div class="row-sub muted">${label}</div>` : ''}
+          </div>
+        </div>
+        <div class="right">
+          <div class="v">${fmtInt(amt)}</div>
+          <div class="small muted">币安长征</div>
+        </div>
+      </div>`;
+    }
+    list.innerHTML = html || '<div class="row" style="opacity:0.5;"><div class="row-left">暂无数据</div></div>';
+  } catch (e) {
+    console.error('loadDailyBoard', e);
+  }
+}
+
+// ============ 读取个人数据 ============
+async function loadUserData() {
+  if (!userAddress) return;
+  try {
+    const [detail, ov] = await Promise.all([
+      router.burnUserDetail(VAULT_CONTRACT.address, userAddress),
+      vault.overview(),
+    ]);
+
+    // Hero
+    setText('hero-bacz-pending', fmt(detail.pendingTotal || 0, 4));
+    setText('hero-bacz-burned', fmt(detail.selfBurned || 0, 4));
+    setText('hero-slis-pending', fmt(ov._myPendingBurnDividend || 0, 4));
+
+    // 燃烧页
+    setText('my-burned', fmtInt(detail.selfBurned));
+    setText('my-weight', fmtInt(detail.weight));
+    setText('my-pending-reward', fmt(detail.pendingTotal, 4));
+
+    // 日榜
+    setText('my-rank', '#—');
+    setText('my-rank-info', '今日燃烧 ' + fmtInt(detail.todayBurned) + ' 币安长征');
+    setText('my-rank-reward', '待领取 ' + fmt(detail.pendingDaily, 4) + ' slisBNB');
+
+    // 邀请页
+    const inviteLink = 'https://bacz.io/?ref=' + userAddress;
+    setText('invite-link', inviteLink);
+    setText('l1-reward', fmt(detail.pendingInvite, 4));
+
+    // 钱包状态
+    const short = shortAddr(userAddress);
+    setHTML('walletStatus', '已连接 · <span class="addr">' + short + '</span>');
+    setHTML('footerStatus', '<span class="ok">已连接</span> · 合约安全检测通过');
+
+  } catch (e) {
+    console.error('loadUserData', e);
+  }
+}
+
+// ============ 钱包连接 ============
+async function toggleWallet() {
+  if (!walletConnected) {
+    if (!window.ethereum) { showToast('请安装 MetaMask', 'error'); return; }
+    try {
+      const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+      await web3Provider.send('eth_requestAccounts', []);
+      signer = web3Provider.getSigner();
+      userAddress = await signer.getAddress();
+      walletConnected = true;
+      initWriteContracts();
+
+      const btn = document.getElementById('walletBtn');
+      btn.textContent = '断开';
+      btn.classList.remove('btn-light');
+      btn.classList.add('btn-dark');
+      showToast('钱包已连接', 'success');
+
+      await loadUserData();
+    } catch (e) {
+      showToast('连接失败: ' + (e.message || e), 'error');
+    }
   } else {
     walletConnected = false;
+    userAddress = null;
+    signer = null;
+    initReadContracts();
+    const btn = document.getElementById('walletBtn');
     btn.textContent = '连接钱包';
     btn.classList.remove('btn-dark');
     btn.classList.add('btn-light');
-    status.textContent = '未连接钱包';
-    footer.textContent = '未连接 · 合约安全检测通过';
+    setText('walletStatus', '未连接钱包');
+    setText('footerStatus', '未连接 · 合约安全检测通过');
+    showToast('已断开钱包', 'info');
   }
 }
+
+// ============ 刷新 ============
+async function handleRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('refresh-spin');
+  await loadGlobalData();
+  if (walletConnected) await loadUserData();
+  setTimeout(() => btn.classList.remove('refresh-spin'), 700);
+  showToast('链上数据已刷新', 'success');
+}
+
+// ============ 燃烧 ============
+async function doBurn() {
+  if (!walletConnected) { showToast('请先连接钱包', 'error'); return; }
+  const input = document.getElementById('burnAmount');
+  const raw = input.value.replace(/,/g, '');
+  if (!raw || raw <= 0) { showToast('请输入燃烧数量', 'error'); return; }
+
+  try {
+    const amount = ethers.utils.parseUnits(raw, 18);
+
+    // 1. 检查授权
+    showToast('检查代币授权…', 'info');
+    const allowance = await token.allowance(userAddress, VAULT_CONTRACT.address);
+    if (allowance.lt(amount)) {
+      showToast('正在授权代币…', 'info');
+      const approveTx = await token.approve(VAULT_CONTRACT.address, ethers.constants.MaxUint256);
+      await approveTx.wait();
+      showToast('授权成功', 'success');
+    }
+
+    // 2. 执行燃烧
+    showToast('燃烧交易中…', 'info');
+    const inv = await router.burnInviter(VAULT_CONTRACT.address, userAddress);
+    const inviterAddr = inv.hasInviter ? inv.inviter : ethers.constants.AddressZero;
+    const burnTx = await vault.burn(amount, inviterAddr);
+    await burnTx.wait();
+    showToast('燃烧成功！', 'success');
+
+    await loadGlobalData();
+    await loadUserData();
+
+  } catch (e) {
+    console.error('doBurn', e);
+    showToast('燃烧失败: ' + (e.message || e), 'error');
+  }
+}
+
+// ============ 复制邀请链接 ============
+function copyInviteLink() {
+  const el = document.getElementById('invite-link');
+  const text = el.textContent;
+  if (text.startsWith('http')) {
+    navigator.clipboard.writeText(text).then(() => showToast('链接已复制', 'success'));
+  } else {
+    showToast('请先连接钱包', 'error');
+  }
+}
+
+// ============ 启动 ============
+window.addEventListener('DOMContentLoaded', async () => {
+  initReadContracts();
+  await loadGlobalData();
+});
 
 </script>
 </body>
