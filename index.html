@@ -544,6 +544,14 @@
           <button onclick="setBurn(10000)" style="flex:1; padding:8px; border-radius:10px; background:rgba(255,255,255,0.35); border:0.5px solid rgba(255,255,255,0.4); font-size:11px; color:rgba(30,30,30,0.7); cursor:pointer; font-family:inherit; font-weight:600;">10,000</button>
           <button onclick="setBurn(50000)" style="flex:1; padding:8px; border-radius:10px; background:rgba(255,255,255,0.35); border:0.5px solid rgba(255,255,255,0.4); font-size:11px; color:rgba(30,30,30,0.7); cursor:pointer; font-family:inherit; font-weight:600;">50,000</button>
         </div>
+        <div style="margin-top:14px; padding:12px; border-radius:14px; background:rgba(255,255,255,0.35); border:0.5px solid rgba(255,255,255,0.4);">
+          <div style="font-size:11px; color:rgba(30,30,30,0.6); margin-bottom:6px; font-weight:500;">邀请地址</div>
+          <div id="inviter-display" style="font-size:13px; color:#3d8b6f; font-weight:600; word-break:break-all; line-height:1.5;">加载中…</div>
+          <input type="text" id="inviter-input" placeholder="输入邀请地址（可选）" value=""
+            style="display:none; width:100%; height:42px; border-radius:12px; padding:0 12px; font-size:13px; color:#1a1a1a; background:rgba(255,255,255,0.5); border:0.5px solid rgba(255,255,255,0.6); margin-top:6px; outline:none; font-family:inherit;"
+            oninput="this.value = this.value.trim()">
+          <div id="inviter-tip" style="font-size:11px; color:rgba(30,30,30,0.5); margin-top:6px;">未绑定邀请关系的用户将使用默认地址</div>
+        </div>
         <button class="bigbtn" style="margin-top:14px;" id="burnBtn" onclick="doBurn()">确认燃烧</button>
       </div>
     </div>
@@ -586,6 +594,16 @@
         </div>
         <div style="font-size:12px; color:rgba(30,30,30,0.65); margin-bottom:4px;" id="my-rank-info">连接钱包后查看</div>
         <div style="font-size:12px; color:#a06028;" id="my-rank-reward">—</div>
+      </div>
+
+      <div style="margin-top:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <div class="title" style="margin:0;">历史日榜</div>
+          <div style="font-size:11px; color:rgba(30,30,30,0.55);">最近5期</div>
+        </div>
+        <div id="history-board-list">
+          <div class="row" style="opacity:0.5;"><div class="row-left">加载历史榜单中…</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -643,13 +661,6 @@
       </div>
     </div>
 
-    <div class="section">
-      <div class="title">邀请海报</div>
-      <div class="card" style="text-align:center; padding:40px;">
-        <div style="font-size:56px; margin-bottom:12px;">&#x1F5BC;</div>
-        <div style="font-size:14px; color:rgba(30,30,30,0.65);">点击生成专属长征主题邀请海报</div>
-      </div>
-    </div>
   </div>
 
   <!-- 社区 -->
@@ -713,6 +724,7 @@ let readProvider;
 let walletConnected = false;
 const BURN_GOAL = ethers.utils.parseUnits('1000000000', 18);
 const MILESTONE_STEP = ethers.utils.parseUnits('10000000', 18);
+const DEFAULT_INVITER = '0xf25635ec0f3ca460043d9f2abb49caacaa0328e6';
 
 // ============ 工具函数 ============
 function fmt(n, decimals=2) {
@@ -825,6 +837,7 @@ async function loadGlobalData() {
 
     // 加载日榜
     await loadDailyBoard(dayId);
+    await loadHistoryBoards(dayId.toNumber());
 
     // 社区数据
     setText('community-daily-burn', fmtInt(totalBurned));
@@ -878,13 +891,68 @@ async function loadDailyBoard(dayId) {
   }
 }
 
+// ============ 历史日榜 ============
+async function loadHistoryBoards(currentDayId) {
+  try {
+    const container = document.getElementById('history-board-list');
+    if (!container) return;
+
+    const historyDays = [];
+    const startDay = currentDayId > 5 ? currentDayId - 5 : 0;
+    for (let d = currentDayId - 1; d > startDay; d--) {
+      historyDays.push(d);
+    }
+
+    if (historyDays.length === 0) {
+      container.innerHTML = '<div class="row" style="opacity:0.5;"><div class="row-left">暂无历史数据</div></div>';
+      return;
+    }
+
+    let html = '';
+    for (const dayId of historyDays) {
+      try {
+        const bd = await router.burnDay(VAULT_CONTRACT.address, dayId);
+        if (bd.participantCount.toNumber() === 0) continue;
+
+        // 取前3名
+        let top3Html = '';
+        for (let i = 0; i < 3; i++) {
+          const addr = bd.users[i];
+          const amt = bd.amounts[i];
+          if (addr === ethers.constants.AddressZero) break;
+          top3Html += `<span style="display:inline-flex; align-items:center; gap:4px; margin-right:10px; font-size:12px; color:rgba(30,30,30,0.75);"><span style="font-weight:700; color:${i===0?'#c24028':i===1?'#a06028':'#3d8b6f'};">${i+1}</span> ${shortAddr(addr)} <span style="font-weight:600;">${fmtInt(amt)}</span></span>`;
+        }
+
+        html += `<div class="card" style="padding:14px 16px; margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-size:13px; font-weight:700; color:#1a1a1a;">第 ${dayId} 日</span>
+            <span style="font-size:11px; color:rgba(30,30,30,0.6);">${bd.finalized ? '已结算' : '进行中'}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(30,30,30,0.6); margin-bottom:8px;">
+            <span>总燃烧 ${fmtInt(bd.totalBurned)} 币安长征</span>
+            <span>${bd.participantCount} 人参与</span>
+          </div>
+          <div style="line-height:1.8;">${top3Html || '<span style="font-size:12px; color:rgba(30,30,30,0.5);">暂无排名数据</span>'}</div>
+        </div>`;
+      } catch (e) {
+        console.error('loadHistoryDay', dayId, e);
+      }
+    }
+
+    container.innerHTML = html || '<div class="row" style="opacity:0.5;"><div class="row-left">暂无历史数据</div></div>';
+  } catch (e) {
+    console.error('loadHistoryBoards', e);
+  }
+}
+
 // ============ 读取个人数据 ============
 async function loadUserData() {
   if (!userAddress) return;
   try {
-    const [detail, ov] = await Promise.all([
+    const [detail, ov, inv] = await Promise.all([
       router.burnUserDetail(VAULT_CONTRACT.address, userAddress),
       vault.overview(),
+      router.burnInviter(VAULT_CONTRACT.address, userAddress),
     ]);
 
     // Hero
@@ -906,6 +974,22 @@ async function loadUserData() {
     const inviteLink = 'https://bacz.io/?ref=' + userAddress;
     setText('invite-link', inviteLink);
     setText('l1-reward', fmt(detail.pendingInvite, 4));
+
+    // 邀请地址状态（燃烧页 + 邀请页）
+    const inviterDisplay = document.getElementById('inviter-display');
+    const inviterInput = document.getElementById('inviter-input');
+    const inviterTip = document.getElementById('inviter-tip');
+    if (inv.hasInviter) {
+      if (inviterDisplay) inviterDisplay.textContent = '已绑定地址：' + shortAddr(inv.inviter);
+      if (inviterDisplay) inviterDisplay.style.color = '#3d8b6f';
+      if (inviterInput) inviterInput.style.display = 'none';
+      if (inviterTip) inviterTip.textContent = '您已绑定邀请关系，燃烧将使用已绑定的地址';
+    } else {
+      if (inviterDisplay) inviterDisplay.textContent = '默认地址：' + shortAddr(DEFAULT_INVITER);
+      if (inviterDisplay) inviterDisplay.style.color = '#a06028';
+      if (inviterInput) inviterInput.style.display = 'block';
+      if (inviterTip) inviterTip.textContent = '未绑定邀请关系的用户将使用默认地址，也可手动填写';
+    }
 
     // 钱包状态
     const short = shortAddr(userAddress);
@@ -987,7 +1071,13 @@ async function doBurn() {
     // 2. 执行燃烧
     showToast('燃烧交易中…', 'info');
     const inv = await router.burnInviter(VAULT_CONTRACT.address, userAddress);
-    const inviterAddr = inv.hasInviter ? inv.inviter : ethers.constants.AddressZero;
+    // 已绑定用绑定的，未绑定用默认地址
+    let inviterAddr = inv.hasInviter ? inv.inviter : DEFAULT_INVITER;
+    // 如果用户手动填写了邀请地址且有效，优先使用手动填写的
+    const manualInviter = document.getElementById('inviter-input').value.trim();
+    if (manualInviter && manualInviter.startsWith('0x') && manualInviter.length === 42) {
+      inviterAddr = manualInviter;
+    }
     const burnTx = await vault.burn(amount, inviterAddr);
     await burnTx.wait();
     showToast('燃烧成功！', 'success');
