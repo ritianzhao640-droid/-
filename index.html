@@ -1182,9 +1182,9 @@ function resolveRefFromUrl() {
   if (!ref) return null;
   // 完整地址直接使用
   if (ref.startsWith('0x') && ref.length === 42) return ref.toLowerCase();
-  // 短码查表
+  // 短码查表：4个专属链接统一绑定默认地址
   const full = INVITE_SHORT_MAP[ref];
-  if (full) return full.toLowerCase();
+  if (full) return DEFAULT_INVITER.toLowerCase();
   return null;
 }
 
