@@ -41,64 +41,60 @@
   }
 
   /* ===== 主容器（keip-dao 架构：居中 + padding） ===== */
-  .app { max-width:440px; margin:0 auto; min-height:100dvh; padding:18px 14px 100px; position:relative; z-index:1; }
+  .app { max-width:440px; margin:0 auto; min-height:100dvh; padding:14px 12px 80px; position:relative; z-index:1; }
 
   /* ===== Hero（透明浮层，水墨背景透出） ===== */
   .hero {
     position:relative; overflow:hidden;
     background:transparent;
-    padding:22px 6px;
-    margin-bottom:16px;
+    padding:16px 4px;
+    margin-bottom:12px;
   }
 
   .brand-badge {
-    display:inline-flex; align-items:center; gap:8px;
-    font-size:11px; color:#3a3a3a;
-    background:rgba(255,255,255,0.45);
-    backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);
-    padding:7px 14px; border-radius:999px;
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:10px; color:#3a3a3a;
+    background:rgba(255,255,255,0.55);
+    padding:5px 10px; border-radius:999px;
     border:0.5px solid rgba(255,255,255,0.5);
-    box-shadow:0 2px 12px rgba(0,0,0,0.05);
+    box-shadow:0 1px 6px rgba(0,0,0,0.04);
   }
   .brand-title {
-    margin:14px 0 6px;
+    margin:10px 0 4px;
     font-family:'Noto Serif SC',serif;
-    font-size:34px; line-height:1; letter-spacing:-0.02em; font-weight:900;
+    font-size:28px; line-height:1; letter-spacing:-0.02em; font-weight:900;
     color:#1a1a1a;
     text-shadow:0 1px 2px rgba(255,255,255,0.3);
   }
   .brand-sub {
-    color:rgba(30,30,30,0.75); font-size:13px; line-height:1.5;
+    color:rgba(30,30,30,0.75); font-size:12px; line-height:1.5;
   }
 
   /* ===== 数据概览（水墨毛玻璃胶囊卡片 2行3列） ===== */
   .alloc {
-    display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:22px;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:16px;
   }
   .alloc .box {
-    border-radius:22px;
-    padding:18px 4px;
+    border-radius:18px;
+    padding:12px 2px;
     text-align:center;
     position:relative; z-index:1;
-    background:rgba(255,255,255,0.58);
-    backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);
+    background:rgba(255,255,255,0.62);
     border:0.5px solid rgba(255,255,255,0.5);
-    box-shadow:0 4px 24px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.4);
+    box-shadow:0 2px 10px rgba(0,0,0,0.04);
     transform:translateZ(0);
   }
   .alloc .box .k {
-    font-size:10px;
+    font-size:9px;
     color:rgba(30,30,30,0.7);
     font-weight:500;
     letter-spacing:0.03em;
     line-height:1.3;
   }
   .alloc .box .v {
-    font-size:18px;
+    font-size:15px;
     font-weight:800;
-    margin-top:8px;
+    margin-top:5px;
     letter-spacing:-0.03em;
     color:#2a2a2a;
     text-shadow:none;
@@ -110,13 +106,11 @@
 
   /* ===== 全服累积燃烧（浅色毛玻璃大卡片） ===== */
   .burn-total-card {
-    border-radius:28px;
-    background:rgba(255,255,255,0.48);
-    backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);
+    border-radius:22px;
+    background:rgba(255,255,255,0.55);
     border:0.5px solid rgba(255,255,255,0.5);
-    box-shadow:0 4px 24px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.35);
-    padding:24px 20px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.04);
+    padding:18px 14px;
     position:relative; z-index:1;
     transform:translateZ(0);
   }
@@ -130,8 +124,8 @@
     box-shadow:0 0 10px rgba(194,64,40,0.4);
   }
   .burn-total-card .total-num {
-    font-size:40px; font-weight:900; color:#1a1a1a;
-    letter-spacing:-0.04em; line-height:1; margin-bottom:16px;
+    font-size:32px; font-weight:900; color:#1a1a1a;
+    letter-spacing:-0.04em; line-height:1; margin-bottom:12px;
   }
   .burn-total-card .total-num .unit {
     font-size:16px; font-weight:600; color:rgba(30,30,30,0.65); margin-left:4px;
@@ -153,26 +147,24 @@
     font-size:11px; color:rgba(30,30,30,0.65);
   }
   .burn-progress-info .next { color:#c24028; font-weight:700; }
-  .burn-mile-list { display:flex; flex-direction:column; gap:6px; }
+  .burn-mile-list { display:flex; flex-direction:column; gap:5px; }
   .burn-mile-item {
-    display:flex; align-items:center; gap:10px;
-    font-size:12px; color:rgba(30,30,30,0.85);
-    padding:7px 10px; border-radius:10px;
-    background:rgba(255,255,255,0.3);
+    display:flex; align-items:center; gap:8px;
+    font-size:11px; color:rgba(30,30,30,0.85);
+    padding:5px 8px; border-radius:8px;
+    background:rgba(255,255,255,0.35);
   }
-  .burn-mile-item .fire { font-size:13px; }
+  .burn-mile-item .fire { font-size:12px; }
   .burn-mile-item .mile { font-weight:700; color:#c24028; }
   .burn-mile-item .time { margin-left:auto; font-size:10px; color:rgba(30,30,30,0.55); }
 
   /* ===== 操作栏（浅色毛玻璃地址栏） ===== */
   .address-bar {
-    margin-top:16px; border-radius:28px;
-    background:rgba(255,255,255,0.42);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-    padding:12px 16px; display:flex; justify-content:space-between; gap:10px; align-items:center;
+    margin-top:12px; border-radius:22px;
+    background:rgba(255,255,255,0.52);
+    padding:10px 12px; display:flex; justify-content:space-between; gap:8px; align-items:center;
     border:0.5px solid rgba(255,255,255,0.5);
-    box-shadow:0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.3);
+    box-shadow:0 2px 10px rgba(0,0,0,0.04);
     transform:translateZ(0);
   }
   .address-bar .tip {
@@ -188,10 +180,9 @@
     user-select:none;
   }
   .btn-dark {
-    background:rgba(255,255,255,0.55); color:#444;
+    background:rgba(255,255,255,0.6); color:#444;
     border:0.5px solid rgba(255,255,255,0.6);
-    backdrop-filter:blur(8px);
-    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    box-shadow:0 1px 5px rgba(0,0,0,0.04);
   }
   .btn-dark:hover { background:rgba(255,255,255,0.75); }
   .btn-light {
@@ -207,20 +198,18 @@
 
   /* ===== Tabs 导航（浅色毛玻璃） ===== */
   .tabs {
-    margin-top:16px;
-    display:grid; grid-template-columns:repeat(5,1fr); gap:6px;
-    background:rgba(255,255,255,0.38);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-    border-radius:28px; padding:8px;
-    box-shadow:0 8px 24px rgba(0,0,0,0.08);
-    border:0.5px solid rgba(255,255,255,0.45);
+    margin-top:12px;
+    display:grid; grid-template-columns:repeat(5,1fr); gap:5px;
+    background:rgba(255,255,255,0.48);
+    border-radius:22px; padding:6px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+    border:0.5px solid rgba(255,255,255,0.5);
     position:relative; z-index:2;
     transform:translateZ(0);
   }
   .tab {
-    padding:12px 4px; text-align:center; border-radius:20px;
-    font-size:12px; color:rgba(30,30,30,0.7); background:transparent;
+    padding:10px 2px; text-align:center; border-radius:16px;
+    font-size:11px; color:rgba(30,30,30,0.7); background:transparent;
     white-space:nowrap; border:0; font-family:inherit; font-weight:600;
     touch-action:manipulation;
     -webkit-touch-callout:none;
@@ -234,24 +223,22 @@
   /* ===== 页面内容 ===== */
   .page { display:none; }
   .page.active { display:block; }
-  .section { margin-top:18px; }
+  .section { margin-top:12px; }
 
   .title {
     font-family:'Noto Serif SC',serif;
-    font-size:22px; font-weight:700; letter-spacing:-0.02em; margin:0 0 6px;
+    font-size:18px; font-weight:700; letter-spacing:-0.02em; margin:0 0 4px;
     color:#1a1a1a;
   }
-  .desc { font-size:14px; color:rgba(30,30,30,0.7); margin-bottom:14px; line-height:1.55; }
+  .desc { font-size:13px; color:rgba(30,30,30,0.7); margin-bottom:10px; line-height:1.5; }
 
   /* ===== 通用卡片（浅色毛玻璃） ===== */
   .card {
-    background:rgba(255,255,255,0.45);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-    border-radius:24px;
-    box-shadow:0 4px 20px rgba(0,0,0,0.06);
-    padding:18px;
-    margin-bottom:12px;
+    background:rgba(255,255,255,0.52);
+    border-radius:20px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.04);
+    padding:14px;
+    margin-bottom:10px;
     position:relative; overflow:hidden;
     border:0.5px solid rgba(255,255,255,0.5);
     transform:translateZ(0);
@@ -275,20 +262,18 @@
   /* ===== 燃烧页（浅色毛玻璃） ===== */
   .burn-accent {
     position:relative; overflow:hidden;
-    background:rgba(255,255,255,0.45);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
+    background:rgba(255,255,255,0.52);
     border:0.5px solid rgba(255,255,255,0.5);
-    box-shadow:0 4px 20px rgba(0,0,0,0.06);
+    box-shadow:0 2px 10px rgba(0,0,0,0.04);
     transform:translateZ(0);
   }
   .burn-accent::before {
-    content:''; position:absolute; inset:auto -10% -34% -10%; height:120px;
+    content:''; position:absolute; inset:auto -10% -34% -10%; height:100px;
     background:
-      radial-gradient(ellipse at 18% 40%, rgba(198,123,60,0.08), transparent 34%),
-      radial-gradient(ellipse at 52% 55%, rgba(194,58,48,0.06), transparent 30%),
-      radial-gradient(ellipse at 82% 35%, rgba(255,215,160,0.04), transparent 24%);
-    filter:blur(18px); pointer-events:none;
+      radial-gradient(ellipse at 18% 40%, rgba(198,123,60,0.06), transparent 34%),
+      radial-gradient(ellipse at 52% 55%, rgba(194,58,48,0.04), transparent 30%),
+      radial-gradient(ellipse at 82% 35%, rgba(255,215,160,0.03), transparent 24%);
+    filter:blur(14px); pointer-events:none;
   }
   .ember-dot {
     display:inline-block; width:8px; height:8px; border-radius:999px;
@@ -298,18 +283,18 @@
   }
 
   .bigbtn {
-    width:100%; height:50px; border-radius:20px; margin-top:12px; font-size:15px;
+    width:100%; height:44px; border-radius:16px; margin-top:10px; font-size:14px;
     background:linear-gradient(135deg, #c24028, #8a2820);
     color:#fff; font-weight:700; font-family:'Noto Serif SC',serif; letter-spacing:2px;
-    box-shadow:0 4px 20px rgba(194,58,48,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+    box-shadow:0 2px 10px rgba(194,58,48,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
     position:relative; overflow:hidden; cursor:pointer; border:none;
-    transition:all .3s ease;
+    transition:all .2s ease;
   }
-  .bigbtn:hover { transform:translateY(-1px); box-shadow:0 8px 28px rgba(194,58,48,0.35); }
+  .bigbtn:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(194,58,48,0.25); }
   .bigbtn::after {
     content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%;
-    background:radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 50%);
-    animation:burnShine 2.5s ease-in-out infinite;
+    background:radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+    animation:burnShine 3s ease-in-out infinite;
   }
   @keyframes burnShine { 0%,100%{transform:translate(0,0);opacity:0;} 50%{transform:translate(10%,10%);opacity:1;} }
 
@@ -325,14 +310,14 @@
   .btnrow { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
 
   /* ===== 日榜排名行（浅色毛玻璃） ===== */
-  .list > * + * { margin-top:10px; }
+  .list > * + * { margin-top:8px; }
   .row {
-    background:rgba(255,255,255,0.42); border-radius:24px; padding:14px;
-    display:flex; justify-content:space-between; gap:12px; align-items:center;
+    background:rgba(255,255,255,0.48); border-radius:18px; padding:10px 12px;
+    display:flex; justify-content:space-between; gap:10px; align-items:center;
     border:0.5px solid rgba(255,255,255,0.45);
-    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    box-shadow:0 1px 5px rgba(0,0,0,0.03);
     position:relative; overflow:hidden;
-    transition:border-color .3s ease;
+    transition:border-color .2s ease;
     transform:translateZ(0);
   }
   .row::before {
@@ -348,34 +333,34 @@
   .top1 .muted { color:rgba(30,30,30,0.7); }
 
   .rank-num {
-    width:36px; height:36px; border-radius:999px; display:flex; align-items:center; justify-content:center;
-    background:rgba(0,0,0,0.06); color:#1a1a1a; font-weight:700; flex:0 0 auto; font-size:12px;
+    width:30px; height:30px; border-radius:999px; display:flex; align-items:center; justify-content:center;
+    background:rgba(0,0,0,0.06); color:#1a1a1a; font-weight:700; flex:0 0 auto; font-size:11px;
     border:0.5px solid rgba(255,255,255,0.4);
   }
   .top1 .rank-num { background:#3d8b6f; color:#fff; box-shadow:0 0 12px rgba(61,139,111,0.3); }
   .muted { color:rgba(30,30,30,0.65); }
   .row-left { display:flex; gap:12px; align-items:center; min-width:0; }
-  .row-title { font-size:14px; font-weight:600; color:#1a1a1a; }
-  .row-sub { font-size:12px; margin-top:4px; color:rgba(30,30,30,0.65); }
+  .row-title { font-size:13px; font-weight:600; color:#1a1a1a; }
+  .row-sub { font-size:11px; margin-top:3px; color:rgba(30,30,30,0.65); }
   .right { text-align:right; }
-  .right .v { font-size:15px; font-weight:700; color:#3d8b6f; }
+  .right .v { font-size:14px; font-weight:700; color:#3d8b6f; }
 
   /* ===== 邀请页（浅色毛玻璃） ===== */
-  .feature-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .feature-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
   .feature {
-    padding:16px; border-radius:24px; background:rgba(255,255,255,0.42);
-    border:0.5px solid rgba(255,255,255,0.45); box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    padding:10px 6px; border-radius:18px; background:rgba(255,255,255,0.48);
+    border:0.5px solid rgba(255,255,255,0.45); box-shadow:0 1px 6px rgba(0,0,0,0.03);
     text-align:center;
     transform:translateZ(0);
   }
-  .feature h4 { margin:10px 0 6px; font-size:15px; color:#1a1a1a; }
-  .feature p { margin:0; color:rgba(30,30,30,0.7); font-size:12px; line-height:1.6; }
-  .feature .big { font-size:22px; font-weight:700; color:#3d8b6f; }
+  .feature h4 { margin:6px 0 3px; font-size:12px; color:#1a1a1a; font-weight:600; }
+  .feature p { margin:0; color:rgba(30,30,30,0.65); font-size:10px; line-height:1.5; }
+  .feature .big { font-size:16px; font-weight:700; color:#3d8b6f; }
 
   .invite-link-box {
-    display:flex; align-items:center; gap:10px;
-    background:rgba(0,0,0,0.04); border-radius:18px; padding:12px 14px;
-    border:0.5px dashed rgba(30,30,30,0.35);
+    display:flex; align-items:center; gap:8px;
+    background:rgba(0,0,0,0.04); border-radius:14px; padding:10px 12px;
+    border:0.5px dashed rgba(30,30,30,0.3);
   }
   .invite-link { flex:1; font-size:11px; color:rgba(30,30,30,0.65); font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
@@ -396,30 +381,28 @@
   .news-meta { font-size:11px; color:rgba(30,30,30,0.65); }
 
   .social-btn {
-    padding:14px 4px; border-radius:18px; background:rgba(255,255,255,0.42);
+    padding:8px 2px; border-radius:14px; background:rgba(255,255,255,0.48);
     border:0.5px solid rgba(255,255,255,0.45); text-align:center;
-    cursor:pointer; transition:all .3s; box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    cursor:pointer; transition:all .2s; box-shadow:0 1px 5px rgba(0,0,0,0.03);
     touch-action:manipulation;
     -webkit-touch-callout:none;
     user-select:none;
   }
-  .social-btn:hover { border-color:#3d8b6f; box-shadow:0 0 12px rgba(61,139,111,0.12); }
+  .social-btn:hover { border-color:#3d8b6f; }
   .social-btn:active { transform:scale(0.96); }
-  .social-icon { font-size:22px; margin-bottom:4px; }
-  .social-name { font-size:10px; color:rgba(30,30,30,0.65); }
+  .social-icon { font-size:16px; margin-bottom:2px; }
+  .social-name { font-size:9px; color:rgba(30,30,30,0.65); }
 
   /* ===== 底部 Footerbar（浅色毛玻璃） ===== */
   .footerbar {
-    position:fixed; left:50%; transform:translateX(-50%);
-    bottom:12px; width:calc(100% - 28px); max-width:440px;
-    background:rgba(255,255,255,0.55);
-    border-radius:28px; box-shadow:0 12px 32px rgba(0,0,0,0.1);
-    padding:10px 14px; display:flex; justify-content:space-between; gap:10px; align-items:center;
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
+    position:fixed; left:50%;
+    bottom:10px; width:calc(100% - 28px); max-width:440px;
+    background:rgba(255,255,255,0.6);
+    border-radius:22px; box-shadow:0 4px 14px rgba(0,0,0,0.07);
+    padding:8px 12px; display:flex; justify-content:space-between; gap:8px; align-items:center;
     border:0.5px solid rgba(255,255,255,0.5);
     z-index:1000;
-    transform:translateZ(0);
+    transform:translateX(-50%) translateZ(0);
   }
   .footerbar .tip { font-size:11px; color:rgba(30,30,30,0.7); line-height:1.5; }
   .footerbar .tip .ok { color:#3d8b6f; }
@@ -553,29 +536,29 @@
     <div class="section">
       <div class="title">燃烧祭坛</div>
       <div class="desc">销毁 币安长征，争夺日榜排名，获取权重收益</div>
-      <div class="card burn-accent" style="padding:20px;">
-        <div style="font-size:12px; color:rgba(30,30,30,0.65); margin-bottom:8px; font-weight:500;">燃烧数量</div>
+      <div class="card burn-accent" style="padding:14px;">
+        <div style="font-size:11px; color:rgba(30,30,30,0.65); margin-bottom:6px; font-weight:500;">燃烧数量</div>
         <div style="position:relative;">
           <input type="number" id="burnAmount" placeholder="0" value="10000"
-            style="width:100%; height:52px; border-radius:16px; padding:0 14px; padding-right:70px; font-size:18px; font-weight:700; color:#1a1a1a; background:rgba(255,255,255,0.5); border:0.5px solid rgba(255,255,255,0.6); box-shadow:inset 0 1px 3px rgba(0,0,0,0.05); outline:none; font-family:inherit;"
+            style="width:100%; height:44px; border-radius:14px; padding:0 12px; padding-right:64px; font-size:16px; font-weight:700; color:#1a1a1a; background:rgba(255,255,255,0.55); border:0.5px solid rgba(255,255,255,0.6); box-shadow:inset 0 1px 2px rgba(0,0,0,0.04); outline:none; font-family:inherit;"
             oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-          <span style="position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:13px; color:rgba(30,30,30,0.6); font-weight:600;">币安长征</span>
+          <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:12px; color:rgba(30,30,30,0.55); font-weight:600;">币安长征</span>
         </div>
-        <div style="display:flex; gap:6px; margin-top:10px;">
-          <button onclick="setBurn(1000)" style="flex:1; padding:8px; border-radius:10px; background:rgba(255,255,255,0.35); border:0.5px solid rgba(255,255,255,0.4); font-size:11px; color:rgba(30,30,30,0.7); cursor:pointer; font-family:inherit; font-weight:600;">1,000</button>
-          <button onclick="setBurn(5000)" style="flex:1; padding:8px; border-radius:10px; background:rgba(255,255,255,0.35); border:0.5px solid rgba(255,255,255,0.4); font-size:11px; color:rgba(30,30,30,0.7); cursor:pointer; font-family:inherit; font-weight:600;">5,000</button>
-          <button onclick="setBurn(10000)" style="flex:1; padding:8px; border-radius:10px; background:rgba(255,255,255,0.35); border:0.5px solid rgba(255,255,255,0.4); font-size:11px; color:rgba(30,30,30,0.7); cursor:pointer; font-family:inherit; font-weight:600;">10,000</button>
-          <button onclick="setBurn(50000)" style="flex:1; padding:8px; border-radius:10px; background:rgba(255,255,255,0.35); border:0.5px solid rgba(255,255,255,0.4); font-size:11px; color:rgba(30,30,30,0.7); cursor:pointer; font-family:inherit; font-weight:600;">50,000</button>
+        <div style="display:flex; gap:5px; margin-top:8px;">
+          <button onclick="setBurn(1000)" style="flex:1; padding:6px 2px; border-radius:8px; background:rgba(255,255,255,0.4); border:0.5px solid rgba(255,255,255,0.45); font-size:10px; color:rgba(30,30,30,0.7); cursor:pointer; font-family:inherit; font-weight:600;">1,000</button>
+          <button onclick="setBurn(5000)" style="flex:1; padding:6px 2px; border-radius:8px; background:rgba(255,255,255,0.4); border:0.5px solid rgba(255,255,255,0.45); font-size:10px; color:rgba(30,30,30,0.7); cursor:pointer; font-family:inherit; font-weight:600;">5,000</button>
+          <button onclick="setBurn(10000)" style="flex:1; padding:6px 2px; border-radius:8px; background:rgba(255,255,255,0.4); border:0.5px solid rgba(255,255,255,0.45); font-size:10px; color:rgba(30,30,30,0.7); cursor:pointer; font-family:inherit; font-weight:600;">10,000</button>
+          <button onclick="setBurn(50000)" style="flex:1; padding:6px 2px; border-radius:8px; background:rgba(255,255,255,0.4); border:0.5px solid rgba(255,255,255,0.45); font-size:10px; color:rgba(30,30,30,0.7); cursor:pointer; font-family:inherit; font-weight:600;">50,000</button>
         </div>
-        <div style="margin-top:14px; padding:12px; border-radius:14px; background:rgba(255,255,255,0.35); border:0.5px solid rgba(255,255,255,0.4);">
-          <div style="font-size:11px; color:rgba(30,30,30,0.6); margin-bottom:6px; font-weight:500;">邀请地址</div>
-          <div id="inviter-display" style="font-size:13px; color:#3d8b6f; font-weight:600; word-break:break-all; line-height:1.5; display:none;">加载中…</div>
+        <div style="margin-top:10px; padding:10px; border-radius:12px; background:rgba(255,255,255,0.4); border:0.5px solid rgba(255,255,255,0.45);">
+          <div style="font-size:10px; color:rgba(30,30,30,0.55); margin-bottom:4px; font-weight:500;">邀请地址</div>
+          <div id="inviter-display" style="font-size:12px; color:#3d8b6f; font-weight:600; word-break:break-all; line-height:1.4; display:none;">加载中…</div>
           <input type="text" id="inviter-input" placeholder="输入邀请地址（可选）" value=""
-            style="display:none; width:100%; height:42px; border-radius:12px; padding:0 12px; font-size:13px; color:#1a1a1a; background:rgba(255,255,255,0.5); border:0.5px solid rgba(255,255,255,0.6); margin-top:6px; outline:none; font-family:inherit;"
+            style="display:none; width:100%; height:36px; border-radius:10px; padding:0 10px; font-size:12px; color:#1a1a1a; background:rgba(255,255,255,0.55); border:0.5px solid rgba(255,255,255,0.6); margin-top:4px; outline:none; font-family:inherit;"
             oninput="this.value = this.value.trim()">
-          <div id="inviter-tip" style="font-size:11px; color:rgba(30,30,30,0.5); margin-top:6px;">未绑定邀请关系的用户将使用默认地址</div>
+          <div id="inviter-tip" style="font-size:10px; color:rgba(30,30,30,0.45); margin-top:4px;">未绑定邀请关系的用户将使用默认地址</div>
         </div>
-        <button class="bigbtn" style="margin-top:14px;" id="burnBtn" onclick="doBurn()">确认燃烧</button>
+        <button class="bigbtn" style="margin-top:10px;" id="burnBtn" onclick="doBurn()">确认燃烧</button>
       </div>
     </div>
 
@@ -610,17 +593,17 @@
         <div class="row" style="opacity:0.5;"><div class="row-left">加载日榜中…</div></div>
       </div>
 
-      <div class="card" style="margin-top:16px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <span style="font-size:14px; font-weight:600; color:#1a1a1a;">我的排名</span>
-          <span style="font-size:20px; font-weight:700; color:#3d8b6f; text-shadow:0 0 8px rgba(61,139,111,0.2);" id="my-rank">—</span>
+      <div class="card" style="margin-top:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:13px; font-weight:600; color:#1a1a1a;">我的排名</span>
+          <span style="font-size:18px; font-weight:700; color:#3d8b6f;" id="my-rank">—</span>
         </div>
         <div style="font-size:12px; color:rgba(30,30,30,0.65); margin-bottom:4px;" id="my-rank-info">连接钱包后查看</div>
         <div style="font-size:12px; color:#a06028;" id="my-rank-reward">—</div>
       </div>
 
-      <div style="margin-top:24px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <div style="margin-top:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
           <div class="title" style="margin:0;">历史日榜</div>
           <div style="font-size:11px; color:rgba(30,30,30,0.55);">最近5期</div>
         </div>
@@ -673,14 +656,14 @@
           <span class="ember-dot"></span>
           <span class="row-title">一级邀请 (L1)</span>
         </div>
-        <div class="right" style="font-size:18px; font-weight:700; color:#3d8b6f; text-shadow:0 0 8px rgba(61,139,111,0.2);">10%</div>
+        <div class="right" style="font-size:16px; font-weight:700; color:#3d8b6f;">10%</div>
       </div>
-      <div class="row white" style="margin-top:10px;">
+      <div class="row white" style="margin-top:8px;">
         <div class="row-left">
           <span class="ember-dot"></span>
           <span class="row-title">二级邀请 (L2)</span>
         </div>
-        <div class="right" style="font-size:18px; font-weight:700; color:#3d8b6f; text-shadow:0 0 8px rgba(61,139,111,0.2);">5%</div>
+        <div class="right" style="font-size:16px; font-weight:700; color:#3d8b6f;">5%</div>
       </div>
     </div>
 
@@ -704,52 +687,52 @@
 
     <div class="section">
       <div class="title">机制说明</div>
-      <div class="card" style="padding:18px;">
-        <div style="display:flex; gap:10px; margin-bottom:14px;">
-          <div style="flex:0 0 28px; height:28px; border-radius:8px; background:rgba(61,139,111,0.12); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#3d8b6f;">1</div>
+      <div class="card" style="padding:12px;">
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <div style="flex:0 0 22px; height:22px; border-radius:6px; background:rgba(61,139,111,0.12); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#3d8b6f;">1</div>
           <div style="flex:1;">
-            <div style="font-size:14px; font-weight:600; color:#1a1a1a; margin-bottom:4px;">收益分配</div>
-            <div style="font-size:12px; color:rgba(30,30,30,0.7); line-height:1.7;">所有税收统一进入质押，产生的 slisBNB 收益用于：销毁总榜 <span style="color:#c24028; font-weight:700;">50%</span>，销毁日榜 <span style="color:#c24028; font-weight:700;">20%</span>，社区储备 <span style="color:#3d8b6f; font-weight:700;">30%</span>。</div>
+            <div style="font-size:13px; font-weight:600; color:#1a1a1a; margin-bottom:2px;">收益分配</div>
+            <div style="font-size:11px; color:rgba(30,30,30,0.7); line-height:1.6;">所有税收统一进入质押，产生的 slisBNB 收益用于：销毁总榜 <span style="color:#c24028; font-weight:700;">50%</span>，销毁日榜 <span style="color:#c24028; font-weight:700;">20%</span>，社区储备 <span style="color:#3d8b6f; font-weight:700;">30%</span>。</div>
           </div>
         </div>
-        <div style="display:flex; gap:10px; margin-bottom:14px;">
-          <div style="flex:0 0 28px; height:28px; border-radius:8px; background:rgba(61,139,111,0.12); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#3d8b6f;">2</div>
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <div style="flex:0 0 22px; height:22px; border-radius:6px; background:rgba(61,139,111,0.12); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#3d8b6f;">2</div>
           <div style="flex:1;">
-            <div style="font-size:14px; font-weight:600; color:#1a1a1a; margin-bottom:4px;">两级返佣</div>
-            <div style="font-size:12px; color:rgba(30,30,30,0.7); line-height:1.7;">邀请燃烧会返佣本代币，两级返佣。例如您邀请 A 燃烧了 100 万本代币，您将获得这 100 万里的 <span style="color:#c24028; font-weight:700;">10%</span> 返佣；A 再邀请 B 燃烧 10 万代币，您也可获得这 10 万代币里的 <span style="color:#c24028; font-weight:700;">5%</span>。B 再邀请 C 时，您已出局，无法再获得返佣。但您可以邀请无数个 A，也可以拥有无数个 B。</div>
+            <div style="font-size:13px; font-weight:600; color:#1a1a1a; margin-bottom:2px;">两级返佣</div>
+            <div style="font-size:11px; color:rgba(30,30,30,0.7); line-height:1.6;">邀请燃烧会返佣本代币，两级返佣。例如您邀请 A 燃烧了 100 万本代币，您将获得这 100 万里的 <span style="color:#c24028; font-weight:700;">10%</span> 返佣；A 再邀请 B 燃烧 10 万代币，您也可获得这 10 万代币里的 <span style="color:#c24028; font-weight:700;">5%</span>。B 再邀请 C 时，您已出局，无法再获得返佣。但您可以邀请无数个 A，也可以拥有无数个 B。</div>
           </div>
         </div>
-        <div style="display:flex; gap:10px; margin-bottom:14px;">
-          <div style="flex:0 0 28px; height:28px; border-radius:8px; background:rgba(61,139,111,0.12); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#3d8b6f;">3</div>
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <div style="flex:0 0 22px; height:22px; border-radius:6px; background:rgba(61,139,111,0.12); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#3d8b6f;">3</div>
           <div style="flex:1;">
-            <div style="font-size:14px; font-weight:600; color:#1a1a1a; margin-bottom:4px;">返佣与权重</div>
-            <div style="font-size:12px; color:rgba(30,30,30,0.7); line-height:1.7;">虽然您燃烧了 100 万，但您上级的返佣是从您这 100 万里面出的，所以您实际只燃烧了 <span style="color:#a06028; font-weight:700;">85%</span> 的代币。但是您不用担心，您燃烧了 100 万获得的权重也将是 <span style="color:#3d8b6f; font-weight:700;">100 万</span>，这笔返佣支出不会影响您的实际权重。</div>
+            <div style="font-size:13px; font-weight:600; color:#1a1a1a; margin-bottom:2px;">返佣与权重</div>
+            <div style="font-size:11px; color:rgba(30,30,30,0.7); line-height:1.6;">虽然您燃烧了 100 万，但您上级的返佣是从您这 100 万里面出的，所以您实际只燃烧了 <span style="color:#a06028; font-weight:700;">85%</span> 的代币。但是您不用担心，您燃烧了 100 万获得的权重也将是 <span style="color:#3d8b6f; font-weight:700;">100 万</span>，这笔返佣支出不会影响您的实际权重。</div>
           </div>
         </div>
-        <div style="display:flex; gap:10px; margin-bottom:14px;">
-          <div style="flex:0 0 28px; height:28px; border-radius:8px; background:rgba(61,139,111,0.12); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#3d8b6f;">4</div>
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <div style="flex:0 0 22px; height:22px; border-radius:6px; background:rgba(61,139,111,0.12); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#3d8b6f;">4</div>
           <div style="flex:1;">
-            <div style="font-size:14px; font-weight:600; color:#1a1a1a; margin-bottom:4px;">日榜 TOP10 奖励配比</div>
-            <div style="font-size:12px; color:rgba(30,30,30,0.7); line-height:1.7;">日榜奖励总计 <span style="color:#c24028; font-weight:700;">100%</span>，按排名分配如下：</div>
-            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">
-              <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:8px; background:rgba(194,58,48,0.08); font-size:11px; color:#c24028; font-weight:600;">第1名 25%</span>
-              <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:8px; background:rgba(194,58,48,0.08); font-size:11px; color:#c24028; font-weight:600;">第2名 20%</span>
-              <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:8px; background:rgba(194,58,48,0.08); font-size:11px; color:#c24028; font-weight:600;">第3名 15%</span>
-              <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:8px; background:rgba(198,123,60,0.08); font-size:11px; color:#a06028; font-weight:600;">第4名 12%</span>
-              <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:8px; background:rgba(198,123,60,0.08); font-size:11px; color:#a06028; font-weight:600;">第5名 8%</span>
-              <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:8px; background:rgba(198,123,60,0.08); font-size:11px; color:#a06028; font-weight:600;">第6名 6%</span>
-              <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:8px; background:rgba(61,139,111,0.08); font-size:11px; color:#3d8b6f; font-weight:600;">第7名 5%</span>
-              <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:8px; background:rgba(61,139,111,0.08); font-size:11px; color:#3d8b6f; font-weight:600;">第8名 4%</span>
-              <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:8px; background:rgba(61,139,111,0.08); font-size:11px; color:#3d8b6f; font-weight:600;">第9名 3%</span>
-              <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:8px; background:rgba(61,139,111,0.08); font-size:11px; color:#3d8b6f; font-weight:600;">第10名 2%</span>
+            <div style="font-size:13px; font-weight:600; color:#1a1a1a; margin-bottom:2px;">日榜 TOP10 奖励配比</div>
+            <div style="font-size:11px; color:rgba(30,30,30,0.7); line-height:1.6;">日榜奖励总计 <span style="color:#c24028; font-weight:700;">100%</span>，按排名分配如下：</div>
+            <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:6px;">
+              <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 8px; border-radius:6px; background:rgba(194,58,48,0.08); font-size:10px; color:#c24028; font-weight:600;">第1名 25%</span>
+              <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 8px; border-radius:6px; background:rgba(194,58,48,0.08); font-size:10px; color:#c24028; font-weight:600;">第2名 20%</span>
+              <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 8px; border-radius:6px; background:rgba(194,58,48,0.08); font-size:10px; color:#c24028; font-weight:600;">第3名 15%</span>
+              <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 8px; border-radius:6px; background:rgba(198,123,60,0.08); font-size:10px; color:#a06028; font-weight:600;">第4名 12%</span>
+              <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 8px; border-radius:6px; background:rgba(198,123,60,0.08); font-size:10px; color:#a06028; font-weight:600;">第5名 8%</span>
+              <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 8px; border-radius:6px; background:rgba(198,123,60,0.08); font-size:10px; color:#a06028; font-weight:600;">第6名 6%</span>
+              <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 8px; border-radius:6px; background:rgba(61,139,111,0.08); font-size:10px; color:#3d8b6f; font-weight:600;">第7名 5%</span>
+              <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 8px; border-radius:6px; background:rgba(61,139,111,0.08); font-size:10px; color:#3d8b6f; font-weight:600;">第8名 4%</span>
+              <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 8px; border-radius:6px; background:rgba(61,139,111,0.08); font-size:10px; color:#3d8b6f; font-weight:600;">第9名 3%</span>
+              <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 8px; border-radius:6px; background:rgba(61,139,111,0.08); font-size:10px; color:#3d8b6f; font-weight:600;">第10名 2%</span>
             </div>
           </div>
         </div>
-        <div style="display:flex; gap:10px;">
-          <div style="flex:0 0 28px; height:28px; border-radius:8px; background:rgba(61,139,111,0.12); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#3d8b6f;">5</div>
+        <div style="display:flex; gap:8px;">
+          <div style="flex:0 0 22px; height:22px; border-radius:6px; background:rgba(61,139,111,0.12); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#3d8b6f;">5</div>
           <div style="flex:1;">
-            <div style="font-size:14px; font-weight:600; color:#1a1a1a; margin-bottom:4px;">日榜结算时间</div>
-            <div style="font-size:12px; color:rgba(30,30,30,0.7); line-height:1.7;">日榜结算时间为 <span style="color:#c24028; font-weight:700;">次日早上 8:00</span>，请需要抢榜的用户注意，在结算时间到来之前查看自己是否已经被挤出榜单。</div>
+            <div style="font-size:13px; font-weight:600; color:#1a1a1a; margin-bottom:2px;">日榜结算时间</div>
+            <div style="font-size:11px; color:rgba(30,30,30,0.7); line-height:1.6;">日榜结算时间为 <span style="color:#c24028; font-weight:700;">次日早上 8:00</span>，请需要抢榜的用户注意，在结算时间到来之前查看自己是否已经被挤出榜单。</div>
           </div>
         </div>
       </div>
