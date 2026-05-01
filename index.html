@@ -131,6 +131,24 @@
   .burn-total-card .total-num .unit {
     font-size:13px; font-weight:600; color:rgba(30,30,30,0.6); margin-left:3px;
   }
+  .project-burn-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:6px 8px; border-radius:8px;
+    background:rgba(255,255,255,0.35); border:0.5px solid rgba(255,255,255,0.4);
+    margin-bottom:10px;
+  }
+  .project-burn-label {
+    font-size:11px; color:rgba(30,30,30,0.6); font-weight:500;
+    display:flex; align-items:center; gap:5px;
+  }
+  .project-burn-label::before {
+    content:''; display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:linear-gradient(180deg,#4a90d9,#2e5a8a);
+    box-shadow:0 0 8px rgba(74,144,217,0.35);
+  }
+  .project-burn-num {
+    font-size:14px; font-weight:700; color:#2e5a8a;
+  }
   .burn-progress-wrap { margin-bottom:8px; }
   .burn-progress-bar {
     height:6px; border-radius:999px;
@@ -578,6 +596,10 @@
       <div class="burn-total-card">
         <div class="total-label">全服累计燃烧</div>
         <div class="total-num" id="global-burned">—</div>
+        <div class="project-burn-row">
+          <div class="project-burn-label">项目方燃烧</div>
+          <div class="project-burn-num" id="project-burned">—</div>
+        </div>
         <div class="burn-progress-wrap">
           <div class="burn-progress-bar">
             <div class="burn-progress-fill" id="global-progress" style="width:0%;"></div>
@@ -899,8 +921,17 @@ async function loadGlobalData() {
       burnDistributor.dayDuration(),
     ]);
 
+    // 项目方燃烧 = 代币合约自身持有量
+    let projectBurned = ethers.BigNumber.from(0);
+    try {
+      projectBurned = await token.balanceOf(TOKEN_CONTRACT.address);
+    } catch (e) {
+      console.warn('token.balanceOf failed:', e.message);
+    }
+
     // 全服燃烧
     setHTML('global-burned', fmtInt(totalBurned) + '<span class="unit">币安长征</span>');
+    setText('project-burned', fmtInt(projectBurned) + ' 币安长征');
     const progress = totalBurned.mul(10000).div(BURN_GOAL).toNumber() / 100;
     document.getElementById('global-progress').style.width = Math.min(progress, 100) + '%';
     setText('global-progress-text', '已燃烧 ' + fmt(totalBurned, 4) + ' / 目标 10亿');
