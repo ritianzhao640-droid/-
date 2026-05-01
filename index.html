@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
 <!-- 📋 contracts.js 包含所有合约地址、ABI 和网络配置 — 新代币发布时优先替换此文件 -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-<script src="contracts.js?v=3"></script>
+<script src="contracts.js?v=4"></script>
 <style>
   :root {
     --ink-900: #0a0a0a; --ink-800: #111111; --ink-700: #1a1a1a; --ink-600: #262626; --ink-500: #3a3a3a;
@@ -131,33 +131,36 @@
   .burn-total-card .total-num .unit {
     font-size:13px; font-weight:600; color:rgba(30,30,30,0.6); margin-left:3px;
   }
-  .project-burn-row {
-    display:flex; justify-content:space-between; align-items:center;
-    padding:10px 14px; border-radius:12px;
-    background:linear-gradient(135deg, rgba(74,144,217,0.12) 0%, rgba(46,90,138,0.08) 100%);
-    border:1px solid rgba(74,144,217,0.25);
+  .burn-stats-grid {
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;
     margin-bottom:12px;
-    box-shadow:0 2px 10px rgba(74,144,217,0.08);
   }
-  .project-burn-label {
-    font-size:13px; color:#2e5a8a; font-weight:700;
-    display:flex; align-items:center; gap:6px;
-    text-shadow:0 1px 2px rgba(74,144,217,0.15);
+  .burn-stat-item {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:10px 4px; border-radius:12px;
+    background:linear-gradient(135deg, rgba(194,64,40,0.1) 0%, rgba(255,58,58,0.06) 100%);
+    border:1px solid rgba(194,64,40,0.2);
+    box-shadow:0 2px 10px rgba(194,64,40,0.08);
+    text-align:center;
   }
-  .project-burn-label::before {
-    content:''; display:inline-block; width:8px; height:8px; border-radius:50%;
-    background:linear-gradient(180deg,#4a90d9,#2e5a8a);
-    box-shadow:0 0 10px rgba(74,144,217,0.5);
-    animation:pulse-dot 2s ease-in-out infinite;
+  .burn-stat-label {
+    font-size:10px; color:#c24028; font-weight:600;
+    display:flex; align-items:center; gap:4px;
+    margin-bottom:4px;
   }
-  @keyframes pulse-dot {
-    0%,100% { transform:scale(1); opacity:1; }
-    50% { transform:scale(1.3); opacity:0.7; }
+  .burn-stat-label::before {
+    content:''; display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:linear-gradient(180deg,#ff3a3a,#c24028);
+    box-shadow:0 0 8px rgba(194,64,40,0.5);
   }
-  .project-burn-num {
-    font-size:18px; font-weight:900; color:#1a4a7a;
-    letter-spacing:-0.02em;
-    text-shadow:0 1px 3px rgba(74,144,217,0.2);
+  .burn-stat-num {
+    font-size:16px; font-weight:900; color:#a83220;
+    letter-spacing:-0.02em; line-height:1;
+    text-shadow:0 1px 3px rgba(194,64,40,0.15);
+  }
+  .burn-stat-unit {
+    font-size:9px; font-weight:600; color:rgba(194,64,40,0.7);
+    margin-top:2px;
   }
   .burn-progress-wrap { margin-bottom:8px; }
   .burn-progress-bar {
@@ -604,11 +607,22 @@
         <div style="font-size:10px; color:rgba(30,30,30,0.45);">实时追踪进度</div>
       </div>
       <div class="burn-total-card">
-        <div class="total-label">全服累计燃烧</div>
-        <div class="total-num" id="global-burned">—</div>
-        <div class="project-burn-row">
-          <div class="project-burn-label">项目方已燃烧</div>
-          <div class="project-burn-num" id="project-burned">—</div>
+        <div class="burn-stats-grid">
+          <div class="burn-stat-item">
+            <div class="burn-stat-label">全服累积</div>
+            <div class="burn-stat-num" id="global-burned">—</div>
+            <div class="burn-stat-unit">币安长征</div>
+          </div>
+          <div class="burn-stat-item">
+            <div class="burn-stat-label">用户已燃烧</div>
+            <div class="burn-stat-num" id="user-burned">—</div>
+            <div class="burn-stat-unit">币安长征</div>
+          </div>
+          <div class="burn-stat-item">
+            <div class="burn-stat-label">项目方已燃烧</div>
+            <div class="burn-stat-num" id="project-burned">—</div>
+            <div class="burn-stat-unit">币安长征</div>
+          </div>
         </div>
         <div class="burn-progress-wrap">
           <div class="burn-progress-bar">
@@ -939,9 +953,20 @@ async function loadGlobalData() {
       console.warn('token.balanceOf failed:', e.message);
     }
 
-    // 全服燃烧
-    setHTML('global-burned', fmtInt(totalBurned) + '<span class="unit">币安长征</span>');
-    setText('project-burned', fmtInt(projectBurned) + ' 币安长征');
+    // 用户已燃烧（需钱包连接）
+    let userBurned = ethers.BigNumber.from(0);
+    if (userAddress) {
+      try {
+        userBurned = await burnDistributor.cumulativeRawBurned(userAddress);
+      } catch (e) {
+        console.warn('cumulativeRawBurned failed:', e.message);
+      }
+    }
+
+    // 三列数据显示
+    setText('global-burned', fmtInt(totalBurned));
+    setText('user-burned', fmtInt(userBurned));
+    setText('project-burned', fmtInt(projectBurned));
     const progress = totalBurned.mul(10000).div(BURN_GOAL).toNumber() / 100;
     document.getElementById('global-progress').style.width = Math.min(progress, 100) + '%';
     setText('global-progress-text', '已燃烧 ' + fmt(totalBurned, 4) + ' / 目标 10亿');
