@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
 <!-- 📋 contracts.js 包含所有合约地址、ABI 和网络配置 — 新代币发布时优先替换此文件 -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-<script src="contracts.js?v=4"></script>
+<script src="contracts.js?v=5"></script>
 <style>
   :root {
     --ink-900: #0a0a0a; --ink-800: #111111; --ink-700: #1a1a1a; --ink-600: #262626; --ink-500: #3a3a3a;
@@ -963,20 +963,25 @@ async function loadGlobalData() {
       }
     }
 
+    // 全服累积 = 项目方 + 用户
+    const globalDisplay = projectBurned.add(userBurned);
+
     // 三列数据显示
-    setText('global-burned', fmtInt(totalBurned));
+    setText('global-burned', fmtInt(globalDisplay));
     setText('user-burned', fmtInt(userBurned));
     setText('project-burned', fmtInt(projectBurned));
+
+    // 进度条仍用合约真实总燃烧量
     const progress = totalBurned.mul(10000).div(BURN_GOAL).toNumber() / 100;
     document.getElementById('global-progress').style.width = Math.min(progress, 100) + '%';
-    setText('global-progress-text', '已燃烧 ' + fmt(totalBurned, 4) + ' / 目标 10亿');
+    setText('global-progress-text', '已燃烧 ' + fmt(globalDisplay, 4) + ' / 目标 10亿');
 
-    const nextMilestone = totalBurned.div(MILESTONE_STEP).add(1).mul(MILESTONE_STEP);
+    const nextMilestone = globalDisplay.div(MILESTONE_STEP).add(1).mul(MILESTONE_STEP);
     setText('global-next-mile', '下一里程碑 ' + fmt(nextMilestone, 0));
 
     // 里程碑列表（只显示最近2条）
     const milestones = [];
-    const currentMilestone = totalBurned.div(MILESTONE_STEP).mul(MILESTONE_STEP);
+    const currentMilestone = globalDisplay.div(MILESTONE_STEP).mul(MILESTONE_STEP);
     for (let i = 0; i < 2; i++) {
       const m = currentMilestone.sub(MILESTONE_STEP.mul(i));
       if (m.gte(0)) milestones.push(fmt(m, 0));
@@ -1003,7 +1008,7 @@ async function loadGlobalData() {
     await loadHistoryBoards(dayId.toNumber());
 
     // 社区数据
-    setText('community-daily-burn', fmtInt(totalBurned));
+    setText('community-daily-burn', fmtInt(globalDisplay));
 
   } catch (e) {
     console.error('loadGlobalData', e);
