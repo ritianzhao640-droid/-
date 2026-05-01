@@ -41,7 +41,7 @@
   }
 
   /* ===== 主容器（keip-dao 架构：居中 + padding） ===== */
-  .app { max-width:440px; margin:0 auto; min-height:100dvh; padding:14px 12px 80px; position:relative; z-index:1; }
+  .app { max-width:440px; margin:0 auto; min-height:100dvh; padding:14px 12px 24px; position:relative; z-index:1; }
 
   /* ===== Hero（透明浮层，水墨背景透出） ===== */
   .hero {
@@ -441,20 +441,6 @@
   .social-icon { font-size:16px; margin-bottom:2px; }
   .social-name { font-size:9px; color:rgba(30,30,30,0.65); }
 
-  /* ===== 底部 Footerbar（浅色毛玻璃） ===== */
-  .footerbar {
-    position:fixed; left:50%;
-    bottom:10px; width:calc(100% - 28px); max-width:440px;
-    background:rgba(255,255,255,0.6);
-    border-radius:22px; box-shadow:0 4px 14px rgba(0,0,0,0.07);
-    padding:8px 12px; display:flex; justify-content:space-between; gap:8px; align-items:center;
-    border:0.5px solid rgba(255,255,255,0.5);
-    z-index:1000;
-    transform:translateX(-50%) translateZ(0);
-  }
-  .footerbar .tip { font-size:11px; color:rgba(30,30,30,0.7); line-height:1.5; }
-  .footerbar .tip .ok { color:#3d8b6f; }
-
   /* ===== Toast ===== */
   .toast-container {
     position:fixed; top:20px; left:50%; transform:translateX(-50%);
@@ -813,16 +799,6 @@
 
 </div>
 
-<!-- ===== 底部 Footerbar（keip-dao 架构） ===== -->
-<div class="footerbar" id="footerbar">
-  <div class="tip">
-    <span id="footerStatus">未连接 · 合约安全检测通过</span>
-  </div>
-  <div style="font-size:11px; color:rgba(30,30,30,0.65);">
-    币安长征 v1.0
-  </div>
-</div>
-
 <script>
 // ============ 全局状态 ============
 let provider, signer, userAddress;
@@ -1120,8 +1096,6 @@ async function loadUserData() {
     // 钱包状态
     const short = shortAddr(userAddress);
     setHTML('walletStatus', '已连接 · <span class="addr">' + short + '</span>');
-    setHTML('footerStatus', '<span class="ok">已连接</span> · 合约安全检测通过');
-
   } catch (e) {
     console.error('loadUserData', e);
   }
@@ -1184,7 +1158,6 @@ async function toggleWallet() {
     btn.classList.remove('btn-dark');
     btn.classList.add('btn-light');
     setText('walletStatus', '未连接钱包');
-    setText('footerStatus', '未连接 · 合约安全检测通过');
     showToast('已断开钱包', 'info');
   }
 }
