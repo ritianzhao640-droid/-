@@ -546,7 +546,7 @@
         </div>
         <div style="margin-top:14px; padding:12px; border-radius:14px; background:rgba(255,255,255,0.35); border:0.5px solid rgba(255,255,255,0.4);">
           <div style="font-size:11px; color:rgba(30,30,30,0.6); margin-bottom:6px; font-weight:500;">邀请地址</div>
-          <div id="inviter-display" style="font-size:13px; color:#3d8b6f; font-weight:600; word-break:break-all; line-height:1.5;">加载中…</div>
+          <div id="inviter-display" style="font-size:13px; color:#3d8b6f; font-weight:600; word-break:break-all; line-height:1.5; display:none;">加载中…</div>
           <input type="text" id="inviter-input" placeholder="输入邀请地址（可选）" value=""
             style="display:none; width:100%; height:42px; border-radius:12px; padding:0 12px; font-size:13px; color:#1a1a1a; background:rgba(255,255,255,0.5); border:0.5px solid rgba(255,255,255,0.6); margin-top:6px; outline:none; font-family:inherit;"
             oninput="this.value = this.value.trim()">
@@ -983,13 +983,11 @@ async function loadUserData() {
     const inviterInput = document.getElementById('inviter-input');
     const inviterTip = document.getElementById('inviter-tip');
     if (inv.hasInviter) {
-      if (inviterDisplay) inviterDisplay.textContent = '已绑定地址：' + shortAddr(inv.inviter);
-      if (inviterDisplay) inviterDisplay.style.color = '#3d8b6f';
+      if (inviterDisplay) { inviterDisplay.textContent = '已绑定地址：' + shortAddr(inv.inviter); inviterDisplay.style.color = '#3d8b6f'; inviterDisplay.style.display = 'block'; }
       if (inviterInput) inviterInput.style.display = 'none';
       if (inviterTip) inviterTip.textContent = '您已绑定邀请关系，燃烧将使用已绑定的地址';
     } else {
-      if (inviterDisplay) inviterDisplay.textContent = '默认地址：' + shortAddr(DEFAULT_INVITER);
-      if (inviterDisplay) inviterDisplay.style.color = '#a06028';
+      if (inviterDisplay) { inviterDisplay.textContent = ''; inviterDisplay.style.display = 'none'; }
       if (inviterInput) inviterInput.style.display = 'block';
       if (inviterTip) inviterTip.textContent = '未绑定邀请关系的用户将使用默认地址，也可手动填写';
     }
