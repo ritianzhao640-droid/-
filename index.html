@@ -644,6 +644,24 @@
     </div>
 
     <div class="section">
+      <div class="title">生成专属链接</div>
+      <div class="desc">输入钱包地址，生成您的专属邀请链接</div>
+      <div class="card" style="padding:18px;">
+        <input type="text" id="gen-link-input" placeholder="输入钱包地址，例如 0x..." value=""
+          style="width:100%; height:46px; border-radius:14px; padding:0 14px; font-size:13px; color:#1a1a1a; background:rgba(255,255,255,0.5); border:0.5px solid rgba(255,255,255,0.6); outline:none; font-family:inherit;"
+          oninput="this.value = this.value.trim()">
+        <button class="btn-light pill" style="width:100%; margin-top:10px; height:42px; font-size:14px;" onclick="generateInviteLink()">生成链接</button>
+
+        <div id="gen-link-result" style="display:none; margin-top:14px; padding:14px; border-radius:16px; background:rgba(255,255,255,0.45); border:0.5px solid rgba(255,255,255,0.5); text-align:center;">
+          <div style="font-size:11px; color:rgba(30,30,30,0.55); margin-bottom:6px;">您的专属邀请链接</div>
+          <div style="font-size:18px; font-weight:700; color:#1a1a1a; letter-spacing:-0.02em; word-break:break-all; line-height:1.4;" id="gen-link-short">—</div>
+          <div style="font-size:11px; color:rgba(30,30,30,0.5); margin-top:6px; word-break:break-all;" id="gen-link-full">—</div>
+          <button class="btn-light pill" style="margin-top:10px;" onclick="copyGeneratedLink()">复制完整链接</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
       <div class="title">分润比例</div>
       <div class="row white">
         <div class="row-left">
@@ -1018,6 +1036,13 @@ async function loadUserData() {
       if (inviterTip) inviterTip.textContent = '未绑定邀请关系的用户将使用默认地址，也可手动填写';
     }
 
+    // 自动生成链接：如果已连接钱包，自动填充并生成
+    const genInput = document.getElementById('gen-link-input');
+    if (genInput && !genInput.value) {
+      genInput.value = userAddress;
+      generateInviteLink();
+    }
+
     // 钱包状态
     const short = shortAddr(userAddress);
     setHTML('walletStatus', '已连接 · <span class="addr">' + short + '</span>');
@@ -1126,6 +1151,32 @@ function copyInviteLink() {
     navigator.clipboard.writeText(text).then(() => showToast('链接已复制', 'success'));
   } else {
     showToast('请先连接钱包', 'error');
+  }
+}
+
+// ============ 生成专属链接 ============
+function generateInviteLink() {
+  const input = document.getElementById('gen-link-input');
+  const addr = input.value.trim();
+
+  if (!addr || !addr.startsWith('0x') || addr.length !== 42) {
+    showToast('请输入有效的钱包地址', 'error');
+    return;
+  }
+
+  const fullLink = 'https://bacz.io/?ref=' + addr;
+  const suffix = addr.slice(-4);
+  const shortDisplay = 'https://bacz.io/?ref=<span style="color:#3d8b6f;">0x</span>···<span style="color:#3d8b6f; font-weight:800;">' + suffix + '</span>';
+
+  document.getElementById('gen-link-short').innerHTML = shortDisplay;
+  document.getElementById('gen-link-full').textContent = fullLink;
+  document.getElementById('gen-link-result').style.display = 'block';
+}
+
+function copyGeneratedLink() {
+  const full = document.getElementById('gen-link-full').textContent;
+  if (full && full.startsWith('http')) {
+    navigator.clipboard.writeText(full).then(() => showToast('完整链接已复制', 'success'));
   }
 }
 
