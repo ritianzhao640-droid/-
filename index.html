@@ -1085,6 +1085,7 @@ async function toggleWallet() {
       showToast('钱包已连接', 'success');
 
       await loadUserData();
+      checkSelfInvite();
     } catch (e) {
       showToast('连接失败: ' + (e.message || e), 'error');
     }
@@ -1182,10 +1183,21 @@ function resolveRefFromUrl() {
   if (!ref) return null;
   // 完整地址直接使用
   if (ref.startsWith('0x') && ref.length === 42) return ref.toLowerCase();
-  // 短码查表：4个专属链接统一绑定默认地址
+  // 短码查表
   const full = INVITE_SHORT_MAP[ref];
-  if (full) return DEFAULT_INVITER.toLowerCase();
+  if (full) return full.toLowerCase();
   return null;
+}
+
+// ============ 自检：用户不能邀请自己 ============
+function checkSelfInvite() {
+  const urlRef = localStorage.getItem('bacz_ref');
+  if (!urlRef || !userAddress) return;
+  // 如果 URL 邀请地址就是用户自己的地址，自动替换为默认地址
+  if (urlRef.toLowerCase() === userAddress.toLowerCase()) {
+    localStorage.setItem('bacz_ref', DEFAULT_INVITER.toLowerCase());
+    showToast('检测到您进入了自己的推广链接，已自动绑定默认邀请地址', 'info');
+  }
 }
 
 // ============ 启动 ============
