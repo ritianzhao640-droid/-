@@ -633,31 +633,9 @@
           <span style="font-size:12px; color:rgba(30,30,30,0.65);">累计燃烧</span>
           <span style="font-size:16px; font-weight:700; color:#1a1a1a;"><span id="my-burned">—</span> <span style="font-size:12px; color:rgba(30,30,30,0.65);">币安长征</span></span>
         </div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between;">
           <span style="font-size:12px; color:rgba(30,30,30,0.65);">当前权重</span>
           <span style="font-size:16px; font-weight:700; color:#3d8b6f;" id="my-weight">—</span>
-        </div>
-        <div style="height:0.5px; background:rgba(30,30,30,0.1); margin:10px 0;"></div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <div>
-            <div style="font-size:11px; color:rgba(30,30,30,0.55);">日榜奖励</div>
-            <div style="font-size:14px; font-weight:700; color:#3d8b6f; margin-top:2px;"><span id="my-pending-daily">—</span> <span style="font-size:11px; color:rgba(30,30,30,0.55);">slisBNB</span></div>
-          </div>
-          <button class="claim-btn" id="btn-claim-daily" onclick="claimDailyReward()" disabled>领取</button>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <div>
-            <div style="font-size:11px; color:rgba(30,30,30,0.55);">总榜奖励</div>
-            <div style="font-size:14px; font-weight:700; color:#a06028; margin-top:2px;"><span id="my-pending-weighted">—</span> <span style="font-size:11px; color:rgba(30,30,30,0.55);">slisBNB</span></div>
-          </div>
-          <button class="claim-btn" id="btn-claim-weighted" onclick="claimWeightedReward()" disabled>领取</button>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <div style="font-size:11px; color:rgba(30,30,30,0.55);">邀请返佣</div>
-            <div style="font-size:14px; font-weight:700; color:#c24028; margin-top:2px;"><span id="my-pending-invite">—</span> <span style="font-size:11px; color:rgba(30,30,30,0.55);">币安长征</span></div>
-          </div>
-          <button class="claim-btn" id="btn-claim-invite" onclick="claimInviteReward()" disabled>领取</button>
         </div>
       </div>
     </div>
@@ -1089,21 +1067,10 @@ async function loadUserData() {
     setText('my-burned', fmtInt(detail.selfBurned));
     setText('my-weight', fmtInt(detail.weight));
 
-    // 三个待领取金额 + 按钮状态（燃烧页 + 首页）
+    // 首页待领取金额 + 按钮状态
     const pd = detail.pendingDaily || ethers.BigNumber.from(0);
     const pw = detail.pendingWeighted || ethers.BigNumber.from(0);
     const pi = detail.pendingInvite || ethers.BigNumber.from(0);
-    // 燃烧页
-    setText('my-pending-daily', fmt(pd, 4));
-    setText('my-pending-weighted', fmt(pw, 4));
-    setText('my-pending-invite', fmt(pi, 4));
-    const btnDaily = document.getElementById('btn-claim-daily');
-    const btnWeighted = document.getElementById('btn-claim-weighted');
-    const btnInvite = document.getElementById('btn-claim-invite');
-    if (btnDaily) btnDaily.disabled = pd.lte(0);
-    if (btnWeighted) btnWeighted.disabled = pw.lte(0);
-    if (btnInvite) btnInvite.disabled = pi.lte(0);
-    // 首页
     setText('home-pending-daily', fmt(pd, 4));
     setText('home-pending-weighted', fmt(pw, 4));
     setText('home-pending-invite', fmt(pi, 4));
