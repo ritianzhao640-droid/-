@@ -1224,7 +1224,13 @@ async function doBurn() {
       inviterAddr = DEFAULT_INVITER;
     }
 
-    // 3. 合约检查邀请绑定合法性（自绑/互绑/环绑会被拒绝）
+    // 3. 零地址保护：任何情况下都不能用零地址作为邀请人
+    const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
+    if (!inviterAddr || inviterAddr.toLowerCase() === ZERO_ADDR) {
+      inviterAddr = DEFAULT_INVITER;
+    }
+
+    // 4. 合约检查邀请绑定合法性（自绑/互绑/环绑会被拒绝）
     if (!inv.hasInviter && inviterAddr.toLowerCase() !== DEFAULT_INVITER.toLowerCase()) {
       try {
         const check = await router.inviteCheck(VAULT_CONTRACT.address, userAddress, inviterAddr);
