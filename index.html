@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>币安长征</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+<!-- 📋 contracts.js 包含所有合约地址、ABI 和网络配置 — 新代币发布时优先替换此文件 -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <script src="contracts.js"></script>
 <style>
@@ -805,10 +806,14 @@ let provider, signer, userAddress;
 let token, vault, burnDistributor, router;
 let readProvider;
 let walletConnected = false;
+// 📋 数据来源：项目方设定 — 新代币发布时需确认是否调整
 const BURN_GOAL = ethers.utils.parseUnits('1000000000', 18);
 const MILESTONE_STEP = ethers.utils.parseUnits('10000000', 18);
+
+// 📋 数据来源：运营方钱包 — 新代币发布时需替换为新的默认邀请地址
 const DEFAULT_INVITER = '0xf25635ec0f3ca460043d9f2abb49caacaa0328e6';
 
+// 📋 数据来源：运营方设定 — 新代币发布时需更新为新的推广者地址
 // 短码邀请映射（后缀 → 完整地址）
 const INVITE_SHORT_MAP = {
   '9988': '0x7329Ae0bBB2801EFB95670F2794904f872399988',

@@ -1,10 +1,29 @@
 /**
  * 币安长征 (BACZ) — 合约配置
  *
- * 使用说明：
- * 1. 将每个 CONTRACT 下的 address 替换为真实部署地址
- * 2. 将每个 ABI 数组替换为真实编译后的 ABI（可从 BSCScan 或 Hardhat/Foundry 输出复制）
- * 3. 如需切换测试网/主网，修改 RPC_URL 和 CHAIN_ID
+ * ═══════════════════════════════════════════════════════════
+ * 📋 数据来源清单（新代币发布时需逐项替换）
+ * ═══════════════════════════════════════════════════════════
+ *
+ * 1. TOKEN_CONTRACT.address    → 新代币合约部署地址
+ *    TOKEN_CONTRACT.abi        → 新代币合约完整 ABI（Hardhat/Foundry 编译输出或 BSCScan）
+ *
+ * 2. VAULT_CONTRACT.address    → 新金库合约部署地址
+ *    VAULT_CONTRACT.abi        → 新金库合约完整 ABI
+ *
+ * 3. BURN_CONTRACT.address     → 新燃烧/日榜合约部署地址
+ *    BURN_CONTRACT.abi         → 新燃烧合约完整 ABI
+ *
+ * 4. ROUTER_CONTRACT.address   → 新路由/查询合约部署地址
+ *    ROUTER_CONTRACT.abi       → 新路由合约完整 ABI
+ *
+ * 5. DEFAULT_INVITER           → 新默认邀请人地址（index.html 第 ~810 行）
+ *
+ * 6. INVITE_SHORT_MAP          → 新专属短码映射（index.html 第 ~813 行）
+ *
+ * 7. NETWORK                   → 如需换链，修改 RPC、chainId、浏览器（默认 BSC 主网）
+ *
+ * ═══════════════════════════════════════════════════════════
  */
 
 // ==================== 网络配置 ====================
