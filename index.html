@@ -210,6 +210,29 @@
   .claim-btn.claiming { animation:pulse 1.2s ease infinite; }
   @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
 
+  /* 首页领取按钮 */
+  .reward-row { display:flex; gap:8px; }
+  .reward-btn {
+    flex:1; padding:10px 4px; border-radius:14px; text-align:center;
+    background:rgba(255,255,255,0.45);
+    border:0.5px solid rgba(255,255,255,0.5);
+    box-shadow:0 1px 5px rgba(0,0,0,0.03);
+    cursor:pointer; font-family:inherit;
+    transition:all .2s ease;
+    touch-action:manipulation;
+    -webkit-touch-callout:none;
+    user-select:none;
+  }
+  .reward-btn:hover:not(:disabled) {
+    background:rgba(61,139,111,0.08);
+    border-color:rgba(61,139,111,0.3);
+    transform:translateY(-1px);
+  }
+  .reward-btn:disabled {
+    opacity:0.4; cursor:not-allowed; background:rgba(0,0,0,0.02);
+  }
+  .reward-btn.claiming { animation:pulse 1.2s ease infinite; }
+
   /* 刷新按钮 */
   .refresh-spin svg { animation:spin .7s linear infinite; }
   @keyframes spin { to{transform:rotate(360deg);} }
@@ -527,6 +550,29 @@
 
   <!-- 首页 -->
   <div class="page active" id="page-home">
+    <div class="section">
+      <div class="card" style="padding:12px;">
+        <div style="font-size:12px; font-weight:600; color:#1a1a1a; margin-bottom:8px;">待领取奖励</div>
+        <div class="reward-row">
+          <button class="reward-btn" id="home-btn-daily" onclick="claimDailyReward()" disabled>
+            <div style="font-size:10px; color:rgba(30,30,30,0.55);">日榜</div>
+            <div style="font-size:14px; font-weight:700; color:#3d8b6f; margin-top:2px;"><span id="home-pending-daily">—</span></div>
+            <div style="font-size:9px; color:rgba(30,30,30,0.45);">slisBNB</div>
+          </button>
+          <button class="reward-btn" id="home-btn-weighted" onclick="claimWeightedReward()" disabled>
+            <div style="font-size:10px; color:rgba(30,30,30,0.55);">总榜</div>
+            <div style="font-size:14px; font-weight:700; color:#a06028; margin-top:2px;"><span id="home-pending-weighted">—</span></div>
+            <div style="font-size:9px; color:rgba(30,30,30,0.45);">slisBNB</div>
+          </button>
+          <button class="reward-btn" id="home-btn-invite" onclick="claimInviteReward()" disabled>
+            <div style="font-size:10px; color:rgba(30,30,30,0.55);">返佣</div>
+            <div style="font-size:14px; font-weight:700; color:#c24028; margin-top:2px;"><span id="home-pending-invite">—</span></div>
+            <div style="font-size:9px; color:rgba(30,30,30,0.45);">币安长征</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="section">
       <div class="title">全服累积燃烧</div>
       <div class="desc">实时追踪全服燃烧进度与里程碑</div>
@@ -1043,10 +1089,11 @@ async function loadUserData() {
     setText('my-burned', fmtInt(detail.selfBurned));
     setText('my-weight', fmtInt(detail.weight));
 
-    // 三个待领取金额 + 按钮状态
+    // 三个待领取金额 + 按钮状态（燃烧页 + 首页）
     const pd = detail.pendingDaily || ethers.BigNumber.from(0);
     const pw = detail.pendingWeighted || ethers.BigNumber.from(0);
     const pi = detail.pendingInvite || ethers.BigNumber.from(0);
+    // 燃烧页
     setText('my-pending-daily', fmt(pd, 4));
     setText('my-pending-weighted', fmt(pw, 4));
     setText('my-pending-invite', fmt(pi, 4));
@@ -1056,6 +1103,16 @@ async function loadUserData() {
     if (btnDaily) btnDaily.disabled = pd.lte(0);
     if (btnWeighted) btnWeighted.disabled = pw.lte(0);
     if (btnInvite) btnInvite.disabled = pi.lte(0);
+    // 首页
+    setText('home-pending-daily', fmt(pd, 4));
+    setText('home-pending-weighted', fmt(pw, 4));
+    setText('home-pending-invite', fmt(pi, 4));
+    const homeBtnDaily = document.getElementById('home-btn-daily');
+    const homeBtnWeighted = document.getElementById('home-btn-weighted');
+    const homeBtnInvite = document.getElementById('home-btn-invite');
+    if (homeBtnDaily) homeBtnDaily.disabled = pd.lte(0);
+    if (homeBtnWeighted) homeBtnWeighted.disabled = pw.lte(0);
+    if (homeBtnInvite) homeBtnInvite.disabled = pi.lte(0);
 
     // 日榜
     setText('my-rank', '#—');
