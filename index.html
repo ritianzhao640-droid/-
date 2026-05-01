@@ -644,7 +644,7 @@
     <div class="section">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <div class="title" style="margin:0;">烽火日榜</div>
-        <div style="font-size:12px; color:rgba(30,30,30,0.65);">第 <span style="color:#3d8b6f; font-weight:700;" id="board-day-id">—</span> 日 · 距结算 <span style="color:#3d8b6f; font-weight:700;" id="board-countdown">—</span></div>
+        <div style="font-size:12px; color:rgba(30,30,30,0.65);">第 <span style="color:#3d8b6f; font-weight:700;" id="board-day-id">—</span> 期 · 距结算 <span style="color:#3d8b6f; font-weight:700;" id="board-countdown">—</span></div>
       </div>
 
       <div class="list" id="board-list">
@@ -1017,7 +1017,7 @@ async function loadHistoryBoards(currentDayId) {
 
         html += `<div class="card" style="padding:14px 16px; margin-bottom:10px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span style="font-size:13px; font-weight:700; color:#1a1a1a;">第 ${dayId} 日</span>
+            <span style="font-size:13px; font-weight:700; color:#1a1a1a;">第 ${dayId} 期</span>
             <span style="font-size:11px; color:rgba(30,30,30,0.6);">${bd.finalized ? '已结算' : '进行中'}</span>
           </div>
           <div style="display:flex; justify-content:space-between; font-size:11px; color:rgba(30,30,30,0.6); margin-bottom:8px;">
