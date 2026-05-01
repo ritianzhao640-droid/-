@@ -1150,7 +1150,19 @@ async function doBurn() {
       inviterAddr = DEFAULT_INVITER;
     }
 
-    // 3. 执行燃烧
+    // 3. 合约检查邀请绑定合法性（自绑/互绑/环绑会被拒绝）
+    if (!inv.hasInviter && inviterAddr.toLowerCase() !== DEFAULT_INVITER.toLowerCase()) {
+      try {
+        const check = await router.inviteCheck(VAULT_CONTRACT.address, userAddress, inviterAddr);
+        if (!check.canBind) {
+          inviterAddr = DEFAULT_INVITER;
+        }
+      } catch (e) {
+        // 如果合约不支持 inviteCheck，保持原地址让合约自己处理
+      }
+    }
+
+    // 4. 执行燃烧
     showToast('燃烧交易中…', 'info');
     const burnTx = await vault.burn(amount, inviterAddr);
     await burnTx.wait();
@@ -1196,7 +1208,6 @@ function checkSelfInvite() {
   // 如果 URL 邀请地址就是用户自己的地址，自动替换为默认地址
   if (urlRef.toLowerCase() === userAddress.toLowerCase()) {
     localStorage.setItem('bacz_ref', DEFAULT_INVITER.toLowerCase());
-    showToast('检测到您进入了自己的推广链接，已自动绑定默认邀请地址', 'info');
   }
 }
 
