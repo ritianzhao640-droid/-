@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
 <!-- 📋 contracts.js 包含所有合约地址、ABI 和网络配置 — 新代币发布时优先替换此文件 -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-<script src="contracts.js?v=5"></script>
+<script src="contracts.js?v=6"></script>
 <style>
   :root {
     --ink-900: #0a0a0a; --ink-800: #111111; --ink-700: #1a1a1a; --ink-600: #262626; --ink-500: #3a3a3a;
@@ -614,8 +614,8 @@
             <div class="burn-stat-unit">币安长征</div>
           </div>
           <div class="burn-stat-item">
-            <div class="burn-stat-label">用户已燃烧</div>
-            <div class="burn-stat-num" id="user-burned">—</div>
+            <div class="burn-stat-label">全服用户总燃烧</div>
+            <div class="burn-stat-num" id="total-users-burned">—</div>
             <div class="burn-stat-unit">币安长征</div>
           </div>
           <div class="burn-stat-item">
@@ -953,26 +953,19 @@ async function loadGlobalData() {
       console.warn('token.balanceOf failed:', e.message);
     }
 
-    // 用户已燃烧（需钱包连接）
-    let userBurned = ethers.BigNumber.from(0);
-    if (userAddress) {
-      try {
-        userBurned = await burnDistributor.cumulativeRawBurned(userAddress);
-      } catch (e) {
-        console.warn('cumulativeRawBurned failed:', e.message);
-      }
-    }
+    // 全服用户总燃烧 = 合约返回的所有用户累计燃烧量
+    const totalUsersBurned = totalBurned;
 
-    // 全服累积 = 项目方 + 用户
-    const globalDisplay = projectBurned.add(userBurned);
+    // 全服累积 = 全服用户总燃烧 + 项目方燃烧
+    const globalDisplay = totalUsersBurned.add(projectBurned);
 
     // 三列数据显示
     setText('global-burned', fmtInt(globalDisplay));
-    setText('user-burned', fmtInt(userBurned));
+    setText('total-users-burned', fmtInt(totalUsersBurned));
     setText('project-burned', fmtInt(projectBurned));
 
-    // 进度条仍用合约真实总燃烧量
-    const progress = totalBurned.mul(10000).div(BURN_GOAL).toNumber() / 100;
+    // 进度条用全服累积量
+    const progress = globalDisplay.mul(10000).div(BURN_GOAL).toNumber() / 100;
     document.getElementById('global-progress').style.width = Math.min(progress, 100) + '%';
     setText('global-progress-text', '已燃烧 ' + fmt(globalDisplay, 4) + ' / 目标 10亿');
 
