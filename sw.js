@@ -15,9 +15,8 @@ const STATIC_ASSETS = [
 
 // 可选资源（不存在时不阻塞）
 const OPTIONAL_ASSETS = [
-  '/assets/bg-optimized.webp',
-  '/assets/bg-mobile.webp',
   '/assets/bg-optimized.jpg',
+  '/assets/bg-mobile.jpg',
 ];
 
 // 安装: 预缓存核心资源

@@ -17,6 +17,17 @@
 <!-- 📋 contracts.js 包含所有合约地址、ABI 和网络配置 — 新代币发布时优先替换此文件 -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" defer></script>
 <script src="contracts.js?v=7" defer></script>
+
+<!-- 🚀 Service Worker 注册 -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js')
+      .then(function(reg) { console.log('[SW] 注册成功:', reg.scope); })
+      .catch(function(err) { console.log('[SW] 注册失败:', err); });
+  });
+}
+</script>
 <style>
   :root {
     --ink-900: #0a0a0a; --ink-800: #111111; --ink-700: #1a1a1a; --ink-600: #262626; --ink-500: #3a3a3a;
@@ -679,10 +690,9 @@
 <!-- 长征背景 贯穿全局 -->
 <div class="global-bg">
   <picture>
-    <source srcset="assets/bg-optimized.webp" type="image/webp" media="(min-width: 641px)">
-    <source srcset="assets/bg-mobile.webp" type="image/webp" media="(max-width: 640px)">
-    <source srcset="assets/bg-optimized.jpg" type="image/jpeg" media="(min-width: 641px)">
-    <img src="IMG_20260501_130436.png" alt="长征" loading="lazy" decoding="async">
+    <source srcset="assets/bg-mobile.jpg" media="(max-width: 640px)">
+    <source srcset="assets/bg-optimized.jpg" media="(min-width: 641px)">
+    <img src="assets/bg-optimized.jpg" alt="" loading="eager" decoding="async" fetchpriority="high" style="width:100%;height:100%;object-fit:cover;">
   </picture>
 </div>
 
