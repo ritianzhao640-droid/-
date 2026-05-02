@@ -1,0 +1,109 @@
+/* ===== 非关键 CSS - 异步加载 ===== */
+
+/* ===== 奖励排名并排布局 ===== */
+.rewards-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rewards-col .list{margin-top:0}
+@media(max-width:400px){.rewards-grid{grid-template-columns:1fr}}
+
+/* ===== 数据概览（水墨毛玻璃胶囊卡片 2行3列） ===== */
+.alloc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.alloc .box{border-radius:18px;padding:12px 2px;text-align:center;position:relative;z-index:1;background:rgba(255,255,255,0.62);border:.5px solid rgba(255,255,255,0.5);box-shadow:0 2px 10px rgba(0,0,0,0.04);transform:translateZ(0)}
+.alloc .box .k{font-size:9px;color:rgba(30,30,30,0.7);font-weight:500;letter-spacing:0.03em;line-height:1.3}
+.alloc .box .v{font-size:15px;font-weight:800;margin-top:5px;letter-spacing:-0.03em;color:#2a2a2a;line-height:1}
+.alloc .box .v.burn{color:#c24028}
+
+/* ===== 全服累积燃烧（浅色毛玻璃大卡片） ===== */
+.burn-total-card{border-radius:18px;background:rgba(255,255,255,0.55);border:.5px solid rgba(255,255,255,0.5);box-shadow:0 2px 12px rgba(0,0,0,0.04);padding:12px 12px 10px;position:relative;z-index:1;transform:translateZ(0)}
+.burn-total-card .total-label{font-size:11px;color:rgba(30,30,30,0.6);font-weight:500;display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.burn-total-card .total-label::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:linear-gradient(180deg,#ff9a3d,#c24028);box-shadow:0 0 8px rgba(194,64,40,0.35)}
+.burn-total-card .total-num{font-size:28px;font-weight:900;color:#1a1a1a;letter-spacing:-0.04em;line-height:1;margin-bottom:8px}
+.burn-total-card .total-num .unit{font-size:13px;font-weight:600;color:rgba(30,30,30,0.6);margin-left:3px}
+.burn-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.burn-stat-item{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;border-radius:12px;background:linear-gradient(135deg,rgba(194,64,40,0.1) 0%,rgba(255,58,58,0.06) 100%);border:1px solid rgba(194,64,40,0.2);box-shadow:0 2px 10px rgba(194,64,40,0.08);text-align:center}
+.burn-stat-label{font-size:10px;color:#c24028;font-weight:600;display:flex;align-items:center;gap:4px;margin-bottom:4px}
+.burn-stat-label::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:linear-gradient(180deg,#ff3a3a,#c24028);box-shadow:0 0 8px rgba(194,64,40,0.5)}
+.burn-stat-num{font-size:16px;font-weight:900;color:#a83220;letter-spacing:-0.02em;line-height:1;text-shadow:0 1px 3px rgba(194,64,40,0.15)}
+.burn-stat-unit{font-size:9px;font-weight:600;color:rgba(194,64,40,0.7);margin-top:2px}
+.burn-progress-wrap{margin-bottom:8px}
+.burn-progress-bar{height:6px;border-radius:999px;background:rgba(0,0,0,0.06);overflow:hidden;position:relative}
+.burn-progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#ff9a3d 0%,#c24028 100%);box-shadow:0 0 8px rgba(194,64,40,0.25);transition:width 1s ease}
+.burn-progress-info{display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:rgba(30,30,30,0.55)}
+.burn-progress-info .next{color:#c24028;font-weight:700}
+.burn-mile-list{display:flex;flex-direction:column;gap:3px}
+.burn-mile-item{display:flex;align-items:center;gap:6px;font-size:10px;color:rgba(30,30,30,0.75);padding:3px 6px;border-radius:6px;background:rgba(255,255,255,0.3)}
+.burn-mile-item .fire{font-size:10px}
+.burn-mile-item .mile{font-weight:700;color:#c24028}
+.burn-mile-item .time{margin-left:auto;font-size:9px;color:rgba(30,30,30,0.5)}
+
+/* ===== 操作栏（浅色毛玻璃地址栏） ===== */
+.address-bar{margin-top:12px;border-radius:22px;background:rgba(255,255,255,0.52);padding:10px 12px;display:flex;justify-content:space-between;gap:8px;align-items:center;border:.5px solid rgba(255,255,255,0.5);box-shadow:0 2px 10px rgba(0,0,0,0.04);transform:translateZ(0)}
+.address-bar .tip{font-size:13px;color:rgba(30,30,30,0.8);line-height:1.5}
+.address-bar .tip .addr{color:#3d8b6f;font-weight:600}
+
+/* ===== 按钮样式 ===== */
+.btn-dark{background:rgba(255,255,255,0.6);color:#444;border:.5px solid rgba(255,255,255,0.6);box-shadow:0 1px 5px rgba(0,0,0,0.04)}
+.btn-dark:hover{background:rgba(255,255,255,0.75)}
+.btn-light:hover{background:#2d6b52}
+
+/* 领取按钮 */
+.claim-btn{padding:6px 14px;border-radius:10px;font-size:12px;font-weight:600;border:.5px solid rgba(61,139,111,0.4);background:rgba(61,139,111,0.1);color:#3d8b6f;cursor:pointer;font-family:inherit;transition:all .2s ease;touch-action:manipulation;-webkit-touch-callout:none;user-select:none}
+.claim-btn:hover:not(:disabled){background:#3d8b6f;color:#fff}
+.claim-btn:disabled{opacity:.35;cursor:not-allowed;background:rgba(0,0,0,0.04);color:rgba(30,30,30,0.4);border-color:rgba(30,30,30,0.1)}
+.claim-btn.claiming{animation:pulse 1.2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* 首页领取按钮 */
+.reward-row{display:flex;gap:6px}
+.reward-box{flex:1;padding:8px 3px 6px;border-radius:12px;text-align:center;background:rgba(255,255,255,0.65);border:.5px solid rgba(30,30,30,0.12);box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:all .2s ease}
+.reward-claim-btn{width:calc(100% - 16px);margin:0 8px;padding:5px 0;border-radius:8px;border:.5px solid rgba(61,139,111,0.4);background:rgba(61,139,111,0.1);color:#3d8b6f;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s ease;touch-action:manipulation;-webkit-touch-callout:none;user-select:none}
+.reward-claim-btn:hover:not(:disabled){background:#3d8b6f;color:#fff}
+.reward-claim-btn:disabled{opacity:.35;cursor:not-allowed;background:rgba(0,0,0,0.04);color:rgba(30,30,30,0.4);border-color:rgba(30,30,30,0.1)}
+
+/* ===== 通用卡片 ===== */
+.card{border-radius:18px;background:rgba(255,255,255,0.55);border:.5px solid rgba(255,255,255,0.5);box-shadow:0 2px 12px rgba(0,0,0,0.04);padding:14px;position:relative;z-index:1;transform:translateZ(0)}
+.section-title{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+
+/* ===== 列表行 ===== */
+.row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(30,30,30,0.06)}
+.row:last-child{border-bottom:none}
+.row-left{display:flex;align-items:center;gap:10px}
+.row-title{font-size:13px;font-weight:600;color:#1a1a1a}
+.row-sub{font-size:11px;color:rgba(30,30,30,0.5);margin-top:2px}
+.rank-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:rgba(30,30,30,0.06);color:rgba(30,30,30,0.7);flex-shrink:0}
+.row.top1 .rank-num{background:linear-gradient(135deg,#ffd700,#ffed4a);color:#1a1a1a;box-shadow:0 2px 8px rgba(255,215,0,0.3)}
+.right{text-align:right}
+.v{font-size:15px;font-weight:800;color:#1a1a1a;letter-spacing:-0.02em}
+.small{font-size:10px;color:rgba(30,30,30,0.5)}
+.muted{color:rgba(30,30,30,0.5)}
+
+/* ===== 刷新按钮动画 ===== */
+.refresh-spin{animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== 输入框 ===== */
+input[type="text"]:focus{outline:none;border-color:#3d8b6f;box-shadow:0 0 0 3px rgba(61,139,111,0.1)}
+
+/* ===== 响应式优化 ===== */
+@media(min-width:640px){
+  .brand-title{font-size:32px}
+  .alloc .box .v{font-size:17px}
+  .burn-total-card .total-num{font-size:32px}
+}
+
+@media(min-width:1024px){
+  .brand-title{font-size:36px}
+  .rewards-grid{grid-template-columns:1fr 1fr}
+}
+
+/* ===== 减少动画（尊重用户偏好） ===== */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+}
+
+/* ===== 打印样式 ===== */
+@media print{
+  .global-bg{display:none}
+  .app{max-width:none;padding:0}
+  .btn{display:none}
+}

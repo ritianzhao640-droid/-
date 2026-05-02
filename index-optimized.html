@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>币安长征</title>
+
+<!-- 🚀 性能优化: 预加载关键资源 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" as="style">
+<link rel="preload" href="assets/bg-optimized.webp" as="image" type="image/webp">
+
+<!-- 字体加载优化 -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet"></noscript>
+
+<!-- 关键 CSS 内联 -->
+<style>
+:root{--ink-900:#0a0a0a;--ink-800:#111;--ink-700:#1a1a1a;--ink-600:#262626;--ink-500:#3a3a3a;--teal:#3d8b6f;--teal-glow:rgba(61,139,111,0.35);--cream:#e8e2d4;--glass:rgba(255,255,255,0.03);--shadow:0 16px 44px rgba(0,0,0,0.5)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:#f0ebe0;color:#1a1a1a;min-height:100dvh;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:none}
+.global-bg{position:fixed;inset:0;z-index:0;pointer-events:none;will-change:transform}
+.global-bg img{width:100%;height:100%;object-fit:cover;opacity:.75;transform:translateZ(0)}
+.global-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,0.02) 0%,rgba(10,10,10,0.01) 30%,rgba(10,10,10,0.06) 60%,rgba(10,10,10,0.55) 100%)}
+.app{width:100%;max-width:440px;margin:0 auto;min-height:100dvh;padding:14px 12px 24px;position:relative;z-index:1}
+.hero{position:relative;overflow:hidden;background:transparent;padding:16px 4px;margin-bottom:12px}
+.brand-title{margin:10px 0 4px;font-family:'Noto Serif SC',serif;font-size:28px;line-height:1;letter-spacing:-0.02em;font-weight:900;color:#1a1a1a}
+.brand-sub{color:rgba(30,30,30,0.75);font-size:12px;line-height:1.5}
+.loading-overlay{position:fixed;inset:0;background:#f0ebe0;z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity .4s ease}
+.loading-overlay.hidden{opacity:0;pointer-events:none}
+.spinner{width:36px;height:36px;border:3px solid rgba(61,139,111,0.15);border-top-color:#3d8b6f;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn{border:0;cursor:pointer;border-radius:999px;font-weight:600;transition:.18s ease;font-family:inherit;touch-action:manipulation;-webkit-touch-callout:none;user-select:none}
+.btn-light{background:#3d8b6f;color:#fff;box-shadow:0 4px 16px rgba(61,139,111,0.35)}
+.pill{padding:9px 14px;font-size:12px}
+@media(min-width:640px){.app{max-width:600px;padding:20px 16px 32px}}
+@media(min-width:1024px){.app{max-width:900px;padding:24px 20px 40px}}
+</style>
+
+<!-- 非关键 CSS 异步加载 -->
+<link rel="preload" href="css/main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="css/main.css"></noscript>
+
+<!-- 🚀 性能优化: ethers.js 按需加载 + contracts.js 延迟加载 -->
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" defer></script>
+<script src="contracts.js?v=6" defer></script>
+</head>
+<body>
+
+<!-- 加载状态 -->
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
+
+<!-- 全局背景 -->
+<div class="global-bg">
+  <picture>
+    <source srcset="assets/bg-mobile.webp" media="(max-width: 768px)" type="image/webp">
+    <source srcset="assets/bg-optimized.webp" type="image/webp">
+    <img src="assets/bg-optimized.jpg" alt="" loading="eager" decoding="async" fetchpriority="high">
+  </picture>
+</div>
+
+<!-- 主应用容器 -->
+<div class="app">
+  <!-- Hero 区域 -->
+  <div class="hero">
+    <div class="brand-badge">🔥 去中心化燃烧协议</div>
+    <h1 class="brand-title">币安长征</h1>
+    <p class="brand-sub">BACZ - 通过燃烧实现价值共识</p>
+    <div class="contract-row">
+      <span class="contract-label">合约:</span>
+      <span class="contract-addr" id="contractAddr" data-full="">加载中...</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button id="walletBtn" class="btn btn-light pill" onclick="toggleWallet()">连接钱包</button>
+      <button id="refreshBtn" class="btn btn-dark pill" onclick="handleRefresh()">🔄 刷新</button>
+    </div>
+    <div id="walletStatus" style="margin-top:8px;font-size:12px;color:rgba(30,30,30,0.6);">未连接钱包</div>
+  </div>
+
+  <!-- 数据概览 -->
+  <div class="alloc" id="allocSection">
+    <div class="box"><div class="k">全服燃烧</div><div class="v burn" id="global-burned">-</div></div>
+    <div class="box"><div class="k">用户燃烧</div><div class="v" id="total-users-burned">-</div></div>
+    <div class="box"><div class="k">项目方燃烧</div><div class="v" id="project-burned">-</div></div>
+  </div>
+
+  <!-- 燃烧进度 -->
+  <div class="burn-total-card" style="margin-top:12px;">
+    <div class="total-label">全服累积燃烧</div>
+    <div class="total-num" id="global-total">-<span class="unit">BACZ</span></div>
+    <div class="burn-progress-wrap">
+      <div class="burn-progress-bar"><div class="burn-progress-fill" id="global-progress" style="width:0%"></div></div>
+      <div class="burn-progress-info"><span id="global-progress-text">已燃烧 0 / 目标 10亿</span><span class="next" id="global-next-mile">下一里程碑 1000万</span></div>
+    </div>
+  </div>
+
+  <!-- 日榜 -->
+  <div class="card" style="margin-top:12px;">
+    <div class="section-title">🔥 今日燃烧榜 <span style="font-size:11px;color:rgba(30,30,30,0.5);">第 <span id="board-day-id">-</span> 期</span></div>
+    <div id="board-list"><div class="row" style="opacity:.5;"><div class="row-left">加载中...</div></div></div>
+    <div style="text-align:center;margin-top:8px;font-size:11px;color:rgba(30,30,30,0.5);">下期结算: <span id="board-countdown">--:--:--</span></div>
+  </div>
+
+  <!-- 奖励排名 -->
+  <div class="rewards-grid" style="margin-top:12px;">
+    <div class="rewards-col">
+      <div class="section-title">🏆 日榜奖励</div>
+      <div id="rewards-daily-list"><div class="row" style="opacity:.5;"><div class="row-left">加载中...</div></div></div>
+    </div>
+    <div class="rewards-col">
+      <div class="section-title">🏆 总榜奖励</div>
+      <div id="rewards-total-list"><div class="row" style="opacity:.5;"><div class="row-left">加载中...</div></div></div>
+    </div>
+  </div>
+
+  <!-- 操作区域 -->
+  <div class="card" style="margin-top:12px;">
+    <div class="section-title">💰 我的收益</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;">
+      <div style="text-align:center;">
+        <div style="font-size:10px;color:rgba(30,30,30,0.6);">日榜奖励</div>
+        <div style="font-size:16px;font-weight:800;color:#3d8b6f;" id="home-pending-daily">0</div>
+        <button id="home-btn-daily" class="reward-claim-btn" onclick="claimDailyReward()" disabled>领取</button>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:10px;color:rgba(30,30,30,0.6);">总榜奖励</div>
+        <div style="font-size:16px;font-weight:800;color:#a06028;" id="home-pending-weighted">0</div>
+        <button id="home-btn-weighted" class="reward-claim-btn" onclick="claimWeightedReward()" disabled>领取</button>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:10px;color:rgba(30,30,30,0.6);">邀请返佣</div>
+        <div style="font-size:16px;font-weight:800;color:#c24028;" id="home-pending-invite">0</div>
+        <button id="home-btn-invite" class="reward-claim-btn" onclick="claimInviteReward()" disabled>领取</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 燃烧操作 -->
+  <div class="card" style="margin-top:12px;">
+    <div class="section-title">🔥 燃烧代币</div>
+    <div style="margin-top:8px;">
+      <input id="burnAmount" type="text" placeholder="输入燃烧数量" style="width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(30,30,30,0.15);background:rgba(255,255,255,0.5);font-size:14px;">
+      <div id="inviter-display" style="margin-top:6px;font-size:12px;display:none;"></div>
+      <input id="inviter-input" type="text" placeholder="邀请人地址 (可选)" style="width:100%;margin-top:6px;padding:8px 12px;border-radius:10px;border:1px solid rgba(30,30,30,0.12);background:rgba(255,255,255,0.4);font-size:12px;">
+      <div id="inviter-tip" style="margin-top:4px;font-size:11px;color:rgba(30,30,30,0.5);">未绑定邀请关系的用户将使用默认地址，也可手动填写</div>
+      <button class="btn btn-light" style="width:100%;margin-top:10px;padding:12px;font-size:14px;" onclick="doBurn()">确认燃烧</button>
+    </div>
+  </div>
+
+  <!-- 邀请链接 -->
+  <div class="card" style="margin-top:12px;">
+    <div class="section-title">🔗 我的邀请</div>
+    <div class="address-bar" style="margin-top:8px;">
+      <span class="tip">链接: <span id="invite-link" class="addr">请先连接钱包</span></span>
+      <button class="btn btn-dark pill" style="font-size:11px;padding:6px 10px;" onclick="copyInviteLink()">复制</button>
+    </div>
+    <div style="margin-top:6px;font-size:11px;color:rgba(30,30,30,0.5);">一级返佣: <span id="l1-reward" style="color:#3d8b6f;font-weight:700;">0</span> slisBNB</div>
+  </div>
+
+  <!-- 历史记录 -->
+  <div class="card" style="margin-top:12px;">
+    <div class="section-title">📜 历史日榜</div>
+    <div id="history-board-list" style="margin-top:8px;"><div class="row" style="opacity:.5;"><div class="row-left">加载中...</div></div></div>
+  </div>
+
+  <!-- 页脚 -->
+  <div style="text-align:center;margin-top:20px;padding:16px;font-size:11px;color:rgba(30,30,30,0.4);">
+    <p>币安长征 BACZ - 去中心化燃烧协议</p>
+    <p style="margin-top:4px;">合约开源 | 链上可查 | 自动执行</p>
+  </div>
+</div>
+
+<!-- Toast 通知 -->
+<div id="toast" style="position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);z-index:10000;background:rgba(30,30,30,0.9);color:#fff;padding:10px 20px;border-radius:12px;font-size:13px;opacity:0;transition:all .3s ease;pointer-events:none;"></div>
+
+<!-- 🚀 性能优化: 模块化 JS 加载 -->
+<script src="js/app.js" defer></script>
+
+<!-- Service Worker 注册 -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW 注册失败:', err));
+  });
+}
+</script>
+</body>
+</html>
