@@ -1,0 +1,27 @@
+{
+  "name": "bacz-api-server",
+  "version": "1.0.0",
+  "description": "币安长征 DApp 后端数据服务",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "sync": "node src/chain-sync.js",
+    "update-rewards": "node scripts/update-rewards-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "ethers": "^6.10.0",
+    "node-cron": "^3.0.3",
+    "compression": "^1.7.4",
+    "helmet": "^7.1.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

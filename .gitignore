@@ -1,9 +1,50 @@
+# WorkBuddy 工作日志与记忆文件
 .workbuddy/
+
+# 图片资源（按需放开具体文件）
 *.png
+
+# 中间预览/对比页面（非最终功能文件）
 bacz-ui-final-preview.html
 bacz-ui-nav-preview.html
 bacz-ui-preview.html
 bacz-ui-style-compare.html
 bacz-ui-topbar-merge.html
+
+# 说明文档
 README.md
 readme.md
+CHANGELOG.md
+changelog.md
+修改说明.md
+更新日志.md
+
+# 编辑器/IDE 临时文件
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+.vscode/
+.idea/
+*.iml
+
+# 操作系统临时文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志文件
+*.log
+logs/
+
+# 依赖目录
+node_modules/
+
+# 后端服务
+server/.env
+server/.cache/
+server/data/
+server/node_modules/
+server/logs/
+server/*.log
