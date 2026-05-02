@@ -17,6 +17,10 @@ const PORT = process.env.PORT || 3000;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 const REFRESH_INTERVAL = parseInt(process.env.CACHE_REFRESH_INTERVAL, 10) || 300; // 秒
 
+// 项目根目录（静态文件所在目录）
+const path = require('path');
+const projectRoot = path.join(__dirname, '../..');
+
 // ==================== 中间件 ====================
 app.use(helmet({
   contentSecurityPolicy: false, // 允许前端嵌入
@@ -102,6 +106,18 @@ app.get('/api/all', (req, res) => {
     historyBoards: historyBoards || [],
     updatedAt: cache.getAll().lastUpdate,
   });
+});
+
+// 静态文件服务（API 路由之后，404 之前）
+app.use(express.static(projectRoot, {
+  index: 'index.html',
+  dotfiles: 'ignore',
+  maxAge: '30d'
+}));
+
+// 首页兜底
+app.get('/', (req, res) => {
+  res.sendFile(path.join(projectRoot, 'index.html'));
 });
 
 // 404
