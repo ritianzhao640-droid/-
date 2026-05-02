@@ -70,6 +70,28 @@
   .brand-sub {
     color:rgba(30,30,30,0.75); font-size:12px; line-height:1.5;
   }
+  .contract-row {
+    display:flex; align-items:center; gap:6px;
+    font-size:12px; line-height:1.5;
+    margin:6px 0 2px;
+  }
+  .contract-label {
+    color:rgba(30,30,30,0.55); font-weight:500; white-space:nowrap;
+  }
+  .contract-addr {
+    font-family:'SF Mono', Monaco, 'Cascadia Code', monospace;
+    color:rgba(30,30,30,0.75); letter-spacing:0.02em;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:210px;
+  }
+  .contract-copy {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:22px; height:22px; border-radius:6px; border:none;
+    background:rgba(255,255,255,0.45); color:rgba(30,30,30,0.6);
+    cursor:pointer; padding:0; flex-shrink:0;
+    transition:background 0.15s, color 0.15s;
+  }
+  .contract-copy:hover { background:rgba(255,255,255,0.75); color:#1a1a1a; }
+  .contract-copy:active { transform:scale(0.92); }
 
   /* ===== 数据概览（水墨毛玻璃胶囊卡片 2行3列） ===== */
   .alloc {
@@ -518,6 +540,13 @@
     <div style="position:relative; z-index:1;">
       <div class="brand-badge">BSC · 正式网络</div>
       <h1 class="brand-title">币安长征</h1>
+      <div class="contract-row" id="contractRow" style="display:none;">
+        <span class="contract-label">合约</span>
+        <span class="contract-addr" id="contractAddr">—</span>
+        <button class="contract-copy" id="contractCopy" onclick="copyContract()" title="复制合约地址">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
       <div class="brand-sub">以燃烧铸信仰，以长征致远方</div>
       <div class="alloc">
         <div class="box">
@@ -562,11 +591,12 @@
     </div>
   </div>
 
-  <!-- ===== Tabs 导航（keip-dao 5标签） ===== -->
+  <!-- ===== Tabs 导航（keip-dao 6标签） ===== -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab('home', this)">首页</button>
     <button class="tab" onclick="switchTab('burn', this)">燃烧</button>
     <button class="tab" onclick="switchTab('board', this)">日榜</button>
+    <button class="tab" onclick="switchTab('rewards', this)">奖励</button>
     <button class="tab" onclick="switchTab('invite', this)">邀请</button>
     <button class="tab" onclick="switchTab('community', this)">社区</button>
   </div>
@@ -715,6 +745,29 @@
         <div id="history-board-list">
           <div class="row" style="opacity:0.5;"><div class="row-left">加载历史榜单中…</div></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 奖励排名 -->
+  <div class="page" id="page-rewards">
+    <div class="section">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div class="title" style="margin:0;">日榜销毁奖励排名</div>
+        <div style="font-size:11px; color:rgba(30,30,30,0.55);">全周期累积</div>
+      </div>
+      <div class="list" id="rewards-daily-list">
+        <div class="row" style="opacity:0.5;"><div class="row-left">加载中…</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div class="title" style="margin:0;">总榜销毁奖励排名</div>
+        <div style="font-size:11px; color:rgba(30,30,30,0.55);">全周期累积</div>
+      </div>
+      <div class="list" id="rewards-total-list">
+        <div class="row" style="opacity:0.5;"><div class="row-left">加载中…</div></div>
       </div>
     </div>
   </div>
@@ -925,6 +978,15 @@ function initReadContracts() {
   vault = new ethers.Contract(VAULT_CONTRACT.address, VAULT_CONTRACT.abi, readProvider);
   burnDistributor = new ethers.Contract(BURN_CONTRACT.address, BURN_CONTRACT.abi, readProvider);
   router = new ethers.Contract(ROUTER_CONTRACT.address, ROUTER_CONTRACT.abi, readProvider);
+  // 显示合约地址
+  const addr = TOKEN_CONTRACT.address;
+  const addrEl = document.getElementById('contractAddr');
+  const rowEl = document.getElementById('contractRow');
+  if (addrEl && rowEl) {
+    addrEl.textContent = addr.slice(0,6) + '…' + addr.slice(-4);
+    addrEl.dataset.full = addr;
+    rowEl.style.display = 'flex';
+  }
 }
 
 // ============ 初始化合约（写入） ============
@@ -1000,6 +1062,9 @@ async function loadGlobalData() {
     // 加载日榜
     await loadDailyBoard(dayId);
     await loadHistoryBoards(dayId.toNumber());
+
+    // 加载奖励排名
+    await loadRewardRankings(dayId.toNumber());
 
     // 社区数据
     setText('community-daily-burn', fmtInt(globalDisplay));
@@ -1107,6 +1172,147 @@ async function loadHistoryBoards(currentDayId) {
   }
 }
 
+// ============ 奖励排名 ============
+async function loadRewardRankings(currentDayId) {
+  try {
+    // 1. 拉取所有历史日榜数据
+    const allDays = [];
+    for (let d = currentDayId - 1; d >= 0; d--) {
+      allDays.push(d);
+    }
+
+    // 日榜累积: address -> { dailySlis: BigNumber }
+    const dailyMap = {};
+    // 总榜累积: address -> { totalSlis: BigNumber }
+    const totalMap = {};
+
+    // 获取 rankBps 比例表 (万分比)
+    let rankBpsTable = [];
+    try {
+      rankBpsTable = await router.rankBpsTable();
+    } catch (e) {
+      // fallback: 硬编码常见比例
+      rankBpsTable = [2500, 2000, 1500, 1000, 800, 600, 500, 400, 300, 200];
+    }
+
+    for (const dayId of allDays) {
+      try {
+        const bd = await router.burnDay(VAULT_CONTRACT.address, dayId);
+        if (bd.participantCount.toNumber() === 0) continue;
+
+        const rewardPot = bd.rewardPot;
+        if (rewardPot.eq(0)) continue;
+
+        for (let i = 0; i < 10; i++) {
+          const addr = bd.users[i];
+          if (addr === ethers.constants.AddressZero) continue;
+
+          const bps = rankBpsTable[i] || 0;
+          if (bps === 0) continue;
+
+          // 该排名应得 slisBNB = rewardPot * bps / 10000
+          const share = rewardPot.mul(bps).div(10000);
+
+          if (!dailyMap[addr]) dailyMap[addr] = ethers.BigNumber.from(0);
+          dailyMap[addr] = dailyMap[addr].add(share);
+        }
+      } catch (e) {
+        // 忽略单期错误
+      }
+    }
+
+    // 2. 拉取 BurnRewardClaimed 事件，计算每个地址已领取的总榜奖励
+    const burnContract = burnDistributor || new ethers.Contract(BURN_CONTRACT.address, BURN_CONTRACT.abi, readProvider);
+    try {
+      const filter = burnContract.filters.BurnRewardClaimed();
+      const events = await burnContract.queryFilter(filter, 0, 'latest');
+      for (const ev of events) {
+        const addr = ev.args.user;
+        const amt = ev.args.amount;
+        if (!totalMap[addr]) totalMap[addr] = ethers.BigNumber.from(0);
+        totalMap[addr] = totalMap[addr].add(amt);
+      }
+    } catch (e) {
+      console.error('query BurnRewardClaimed events', e);
+    }
+
+    // 3. 查每个地址当前 pendingBurnReward（未领取）
+    const allAddrs = Object.keys(totalMap);
+    const pendingResults = await Promise.all(
+      allAddrs.map(addr =>
+        burnContract.pendingBurnReward(addr).catch(() => ethers.BigNumber.from(0))
+      )
+    );
+    allAddrs.forEach((addr, i) => {
+      totalMap[addr] = totalMap[addr].add(pendingResults[i]);
+    });
+
+    // 4. 排序并渲染日榜排名
+    const dailySorted = Object.entries(dailyMap)
+      .map(([addr, amt]) => ({ addr, amt }))
+      .sort((a, b) => (b.amt.gt(a.amt) ? 1 : -1))
+      .slice(0, 10);
+
+    const dailyList = document.getElementById('rewards-daily-list');
+    if (dailyList) {
+      let html = '';
+      dailySorted.forEach((item, i) => {
+        const rankClass = i === 0 ? 'row top1' : 'row';
+        const rankStyle = i === 1 ? 'style="background:linear-gradient(135deg,#c0c0c0,#a0a0a0);color:#111;"' :
+                          i === 2 ? 'style="background:linear-gradient(135deg,#cd7f32,#a06020);color:#1a1005;"' : '';
+        const label = i === 0 ? '冠军' : i === 1 ? '亚军' : i === 2 ? '季军' : '';
+        html += `<div class="${rankClass}">
+          <div class="row-left">
+            <div class="rank-num" ${rankStyle}>${i+1}</div>
+            <div>
+              <div class="row-title">${shortAddr(item.addr)}</div>
+              ${label ? `<div class="row-sub muted">${label}</div>` : ''}
+            </div>
+          </div>
+          <div class="right">
+            <div class="v" style="color:#3d8b6f;">${fmt(item.amt, 4)}</div>
+            <div class="small muted">slisBNB</div>
+          </div>
+        </div>`;
+      });
+      dailyList.innerHTML = html || '<div class="row" style="opacity:0.5;"><div class="row-left">暂无数据</div></div>';
+    }
+
+    // 5. 排序并渲染总榜排名
+    const totalSorted = Object.entries(totalMap)
+      .map(([addr, amt]) => ({ addr, amt }))
+      .sort((a, b) => (b.amt.gt(a.amt) ? 1 : -1))
+      .slice(0, 10);
+
+    const totalList = document.getElementById('rewards-total-list');
+    if (totalList) {
+      let html = '';
+      totalSorted.forEach((item, i) => {
+        const rankClass = i === 0 ? 'row top1' : 'row';
+        const rankStyle = i === 1 ? 'style="background:linear-gradient(135deg,#c0c0c0,#a0a0a0);color:#111;"' :
+                          i === 2 ? 'style="background:linear-gradient(135deg,#cd7f32,#a06020);color:#1a1005;"' : '';
+        const label = i === 0 ? '冠军' : i === 1 ? '亚军' : i === 2 ? '季军' : '';
+        html += `<div class="${rankClass}">
+          <div class="row-left">
+            <div class="rank-num" ${rankStyle}>${i+1}</div>
+            <div>
+              <div class="row-title">${shortAddr(item.addr)}</div>
+              ${label ? `<div class="row-sub muted">${label}</div>` : ''}
+            </div>
+          </div>
+          <div class="right">
+            <div class="v" style="color:#a06028;">${fmt(item.amt, 4)}</div>
+            <div class="small muted">slisBNB</div>
+          </div>
+        </div>`;
+      });
+      totalList.innerHTML = html || '<div class="row" style="opacity:0.5;"><div class="row-left">暂无数据</div></div>';
+    }
+  } catch (e) {
+    console.error('loadRewardRankings', e);
+  }
+}
+
 // ============ 读取个人数据 ============
 async function loadUserData() {
   if (!userAddress) return;
@@ -1118,7 +1324,7 @@ async function loadUserData() {
     ]);
 
     // Hero
-    setText('hero-bacz-pending', fmt(detail.pendingTotal || 0, 4));
+    setText('hero-bacz-pending', fmt(detail.pendingInvite || 0, 4));
     setText('hero-bacz-burned', fmt(detail.selfBurned || 0, 4));
     setText('hero-slis-pending', fmt(ov._myPendingBurnDividend || 0, 4));
 
@@ -1379,6 +1585,17 @@ async function claimInviteReward() {
     showToast('领取失败: ' + (e.message || e), 'error');
   } finally {
     btn.classList.remove('claiming');
+  }
+}
+
+// ============ 复制合约地址 ============
+function copyContract() {
+  const el = document.getElementById('contractAddr');
+  const full = el && el.dataset.full;
+  if (full) {
+    navigator.clipboard.writeText(full).then(() => showToast('合约地址已复制', 'success'));
+  } else {
+    showToast('合约地址未加载', 'error');
   }
 }
 
