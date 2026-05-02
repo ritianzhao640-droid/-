@@ -7,9 +7,12 @@
 const CONFIG = {
   CACHE_VERSION: 'v2',
   API_TIMEOUT: 10000,
-  REFRESH_INTERVAL: 30000,
+  REFRESH_INTERVAL: 15000,        // 全周期榜单刷新间隔: 15秒
+  REALTIME_UPDATE_INTERVAL: 5000, // 实时数据更新: 5秒
   BURN_GOAL: ethers.utils.parseUnits('1000000000', 18),
   MILESTONE_STEP: ethers.utils.parseUnits('10000000', 18),
+  DAILY_REWARD_POOL: 0.3,         // 日榜奖励池比例 30%
+  WEIGHTED_REWARD_POOL: 0.5,      // 总榜奖励池比例 50%
 };
 
 // ==================== 状态管理 ====================
@@ -20,6 +23,12 @@ const state = {
   provider: null,
   contracts: {},
   isLoading: false,
+  currentDayId: null,
+  totalBoardData: [],      // 全周期榜单缓存
+  lastUpdateTime: 0,
+  updateTimer: null,
+  realtimeTimer: null,
+  rewardCache: {},         // 奖励计算缓存
 };
 
 // ==================== 工具函数 ====================
@@ -276,9 +285,14 @@ const dataLoader = {
   // 加载日榜
   async loadDailyBoard(dayId) {
     try {
+      state.currentDayId = dayId;
       const bd = await state.contracts.router.burnDay(VAULT_CONTRACT.address, dayId);
       const list = document.getElementById('board-list');
       if (!list) return;
+
+      // 计算预计奖励
+      const totalBurned = bd.totalBurned;
+      const rewardPool = totalBurned.mul(ethers.utils.parseUnits(CONFIG.DAILY_REWARD_POOL.toString(), 18)).div(ethers.utils.parseUnits('1', 18));
 
       let html = '';
       for (let i = 0; i < 10; i++) {
@@ -286,25 +300,42 @@ const dataLoader = {
         const amt = bd.amounts[i];
         if (addr === ethers.constants.AddressZero) break;
         
-        const rankStyle = i === 1 ? 'style="background:linear-gradient(135deg,#c0c0c0,#a0a0a0);color:#111;"' :
+        // 计算预计奖励
+        let estimatedReward = ethers.BigNumber.from(0);
+        if (!totalBurned.eq(0)) {
+          const share = amt.mul(ethers.utils.parseUnits('1', 18)).div(totalBurned);
+          estimatedReward = rewardPool.mul(share).div(ethers.utils.parseUnits('1', 18));
+        }
+        
+        const rankStyle = i === 0 ? 'style="background:linear-gradient(135deg,#ffd700,#ffed4a);color:#1a1a1a;box-shadow:0 2px 8px rgba(255,215,0,0.3);"' :
+                          i === 1 ? 'style="background:linear-gradient(135deg,#c0c0c0,#a0a0a0);color:#111;"' :
                           i === 2 ? 'style="background:linear-gradient(135deg,#cd7f32,#a06020);color:#1a1005;"' : '';
         const label = i === 0 ? '冠军' : i === 1 ? '亚军' : i === 2 ? '季军' : '';
         
-        html += `<div class="row ${i === 0 ? 'top1' : ''}">
+        // 高亮当前用户
+        const isCurrentUser = state.userAddress && addr.toLowerCase() === state.userAddress.toLowerCase();
+        const rowStyle = isCurrentUser ? 'style="background:rgba(61,139,111,0.08);border-radius:8px;"' : '';
+        
+        html += `<div class="row ${i === 0 ? 'top1' : ''}" ${rowStyle} data-addr="${addr}">
           <div class="row-left">
             <div class="rank-num" ${rankStyle}>${i + 1}</div>
             <div>
-              <div class="row-title">${utils.shortAddr(addr)}</div>
+              <div class="row-title">${utils.shortAddr(addr)} ${isCurrentUser ? '<span style="color:#3d8b6f;font-size:10px;">(我)</span>' : ''}</div>
               ${label ? `<div class="row-sub muted">${label}</div>` : ''}
             </div>
           </div>
           <div class="right">
             <div class="v">${utils.fmtInt(amt)}</div>
             <div class="small muted">币安长征</div>
+            ${!estimatedReward.eq(0) ? `<div class="estimated-reward">预计 ${utils.fmt(estimatedReward, 4)} slisBNB</div>` : ''}
           </div>
         </div>`;
       }
       list.innerHTML = html || '<div class="row" style="opacity:0.5;"><div class="row-left">暂无数据</div></div>';
+      
+      // 保存数据用于实时更新
+      state.lastBurnDayData = bd;
+      
     } catch (e) {
       console.error('加载日榜失败:', e);
     }
@@ -743,6 +774,252 @@ window.claimInviteReward = () => claims.invite();
 window.copyContract = () => tools.copyContract();
 window.copyInviteLink = () => tools.copyInviteLink();
 
+// ==================== 移动端导航滚动 ====================
+window.scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  updateNavActive(0);
+};
+
+window.scrollToBoard = () => {
+  const boardEl = document.getElementById('board-list');
+  if (boardEl) {
+    boardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    updateNavActive(1);
+  }
+};
+
+window.scrollToBurn = () => {
+  const burnEl = document.getElementById('burnAmount');
+  if (burnEl) {
+    burnEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    updateNavActive(2);
+  }
+};
+
+window.scrollToRewards = () => {
+  const rewardsEl = document.getElementById('home-pending-daily');
+  if (rewardsEl) {
+    rewardsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    updateNavActive(3);
+  }
+};
+
+function updateNavActive(index) {
+  const navItems = document.querySelectorAll('.mobile-nav-item');
+  navItems.forEach((item, i) => {
+    if (i === index) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+}
+
+// 滚动时显示/隐藏浮动按钮
+let lastScrollY = 0;
+window.addEventListener('scroll', () => {
+  const fab = document.getElementById('fabBurn');
+  if (!fab) return;
+  
+  const currentScrollY = window.scrollY;
+  if (currentScrollY > 300 && currentScrollY > lastScrollY) {
+    fab.style.display = 'flex';
+  } else if (currentScrollY < 200) {
+    fab.style.display = 'none';
+  }
+  lastScrollY = currentScrollY;
+}, { passive: true });
+
+// 下拉刷新支持
+let touchStartY = 0;
+let isPulling = false;
+
+document.addEventListener('touchstart', (e) => {
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+  if (window.scrollY === 0) {
+    const touchY = e.touches[0].clientY;
+    const diff = touchY - touchStartY;
+    
+    if (diff > 60 && !isPulling) {
+      isPulling = true;
+      const ptr = document.getElementById('pullToRefresh');
+      if (ptr) ptr.classList.add('visible');
+    }
+  }
+}, { passive: true });
+
+document.addEventListener('touchend', async () => {
+  if (isPulling) {
+    isPulling = false;
+    await tools.refresh();
+    const ptr = document.getElementById('pullToRefresh');
+    if (ptr) ptr.classList.remove('visible');
+  }
+}, { passive: true });
+
+// ==================== 实时更新系统 ====================
+const realtimeUpdater = {
+  // 启动实时更新
+  start() {
+    // 全周期榜单定期刷新 (15秒)
+    state.updateTimer = setInterval(() => {
+      this.refreshTotalBoard();
+    }, CONFIG.REFRESH_INTERVAL);
+    
+    // 实时数据更新 (5秒)
+    state.realtimeTimer = setInterval(() => {
+      this.refreshRealtimeData();
+    }, CONFIG.REALTIME_UPDATE_INTERVAL);
+    
+    console.log('[Realtime] 实时更新已启动');
+  },
+  
+  // 停止实时更新
+  stop() {
+    if (state.updateTimer) {
+      clearInterval(state.updateTimer);
+      state.updateTimer = null;
+    }
+    if (state.realtimeTimer) {
+      clearInterval(state.realtimeTimer);
+      state.realtimeTimer = null;
+    }
+    console.log('[Realtime] 实时更新已停止');
+  },
+  
+  // 刷新全周期榜单
+  async refreshTotalBoard() {
+    try {
+      const indicator = document.querySelector('.update-indicator');
+      if (indicator) indicator.classList.add('updating');
+      
+      // 获取最新数据
+      const [totalBurned, ov] = await Promise.all([
+        state.contracts.burnDistributor.totalActualBurned(),
+        state.contracts.vault.overview(),
+      ]);
+      
+      // 更新全周期数据
+      const globalDisplay = totalBurned.add(state.projectBurned || 0);
+      utils.setText('global-burned', utils.fmtInt(globalDisplay));
+      utils.setText('global-total', utils.fmt(globalDisplay, 4));
+      
+      // 更新进度条
+      const progress = Math.min(globalDisplay.mul(10000).div(CONFIG.BURN_GOAL).toNumber() / 100, 100);
+      const progressEl = document.getElementById('global-progress');
+      if (progressEl) progressEl.style.width = progress + '%';
+      
+      // 更新 Hero 数据
+      utils.setText('hero-vault-bnb', utils.fmt(ov._vaultBnbBalance, 4));
+      utils.setText('hero-staked-bnb', utils.fmt(ov._totalStakedBnb, 4));
+      utils.setText('hero-slis-total', utils.fmt(ov._vaultSlisBalance, 4));
+      
+      state.lastUpdateTime = Date.now();
+      
+      if (indicator) {
+        indicator.classList.remove('updating');
+        const timeEl = indicator.querySelector('.update-time');
+        if (timeEl) timeEl.textContent = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      }
+      
+      console.log('[Realtime] 全周期榜单已更新');
+    } catch (e) {
+      console.error('[Realtime] 刷新失败:', e);
+    }
+  },
+  
+  // 刷新实时数据 (日榜预计奖励)
+  async refreshRealtimeData() {
+    try {
+      if (!state.currentDayId) return;
+      
+      // 获取最新日榜数据
+      const bd = await state.contracts.router.burnDay(VAULT_CONTRACT.address, state.currentDayId);
+      
+      // 计算并显示预计奖励
+      this.calculateEstimatedRewards(bd);
+      
+      // 如果有用户连接，更新用户数据
+      if (state.walletConnected && state.userAddress) {
+        await userData.load();
+      }
+      
+    } catch (e) {
+      console.error('[Realtime] 实时数据更新失败:', e);
+    }
+  },
+  
+  // 计算日榜预计奖励
+  calculateEstimatedRewards(burnDay) {
+    if (!burnDay || burnDay.participantCount.toNumber() === 0) return;
+    
+    const totalBurned = burnDay.totalBurned;
+    if (totalBurned.eq(0)) return;
+    
+    // 获取日榜奖励池 (假设为 vault BNB 的 30%)
+    const rewardPool = burnDay.rewardPool || totalBurned.mul(ethers.utils.parseUnits('0.3', 18)).div(ethers.utils.parseUnits('1', 18));
+    
+    // 计算每个用户的预计奖励
+    const userRewards = [];
+    for (let i = 0; i < 10; i++) {
+      const addr = burnDay.users[i];
+      const amt = burnDay.amounts[i];
+      if (addr === ethers.constants.AddressZero) break;
+      
+      // 按比例计算奖励
+      const share = amt.mul(ethers.utils.parseUnits('1', 18)).div(totalBurned);
+      const estimatedReward = rewardPool.mul(share).div(ethers.utils.parseUnits('1', 18));
+      
+      userRewards.push({
+        rank: i + 1,
+        addr: addr,
+        amount: amt,
+        estimatedReward: estimatedReward,
+        share: share,
+      });
+    }
+    
+    // 更新 UI 显示预计奖励
+    this.updateEstimatedRewardsUI(userRewards);
+  },
+  
+  // 更新预计奖励 UI
+  updateEstimatedRewardsUI(userRewards) {
+    const list = document.getElementById('board-list');
+    if (!list) return;
+    
+    const rows = list.querySelectorAll('.row');
+    rows.forEach((row, index) => {
+      if (index >= userRewards.length) return;
+      
+      const reward = userRewards[index];
+      const rightEl = row.querySelector('.right');
+      if (!rightEl) return;
+      
+      // 检查是否已有预计奖励显示
+      let estimatedEl = rightEl.querySelector('.estimated-reward');
+      if (!estimatedEl) {
+        estimatedEl = document.createElement('div');
+        estimatedEl.className = 'estimated-reward';
+        rightEl.appendChild(estimatedEl);
+      }
+      
+      // 更新预计奖励文本
+      const rewardFormatted = utils.fmt(reward.estimatedReward, 4);
+      estimatedEl.textContent = `预计 ${rewardFormatted} slisBNB`;
+      
+      // 高亮当前用户
+      if (state.userAddress && reward.addr.toLowerCase() === state.userAddress.toLowerCase()) {
+        row.style.background = 'rgba(61, 139, 111, 0.08)';
+        row.style.borderRadius = '8px';
+      }
+    });
+  },
+};
+
 // ==================== 启动 ====================
 window.addEventListener('DOMContentLoaded', async () => {
   // 解析 URL 邀请参数
@@ -765,6 +1042,20 @@ window.addEventListener('DOMContentLoaded', async () => {
   
   // 加载数据
   await dataLoader.loadGlobal();
+  
+  // 启动实时更新
+  realtimeUpdater.start();
+  
+  // 页面可见性变化处理
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      realtimeUpdater.stop();
+    } else {
+      realtimeUpdater.start();
+      // 重新加载数据
+      dataLoader.loadGlobal();
+    }
+  });
 });
 
 // ==================== 性能监控 ====================

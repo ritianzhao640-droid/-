@@ -43,6 +43,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
 <link rel="preload" href="css/main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="css/main.css"></noscript>
 
+<!-- 移动端适配 CSS -->
+<link rel="preload" href="css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="css/mobile.css"></noscript>
+
 <!-- 🚀 性能优化: ethers.js 按需加载 + contracts.js 延迟加载 -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" defer></script>
 <script src="contracts.js?v=6" defer></script>
@@ -98,7 +102,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
 
   <!-- 日榜 -->
   <div class="card" style="margin-top:12px;">
-    <div class="section-title">🔥 今日燃烧榜 <span style="font-size:11px;color:rgba(30,30,30,0.5);">第 <span id="board-day-id">-</span> 期</span></div>
+    <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>🔥 今日燃烧榜 <span style="font-size:11px;color:rgba(30,30,30,0.5);">第 <span id="board-day-id">-</span> 期</span></span>
+      <span class="update-indicator"><span class="pulse"></span><span class="update-time">--:--:--</span></span>
+    </div>
     <div id="board-list"><div class="row" style="opacity:.5;"><div class="row-left">加载中...</div></div></div>
     <div style="text-align:center;margin-top:8px;font-size:11px;color:rgba(30,30,30,0.5);">下期结算: <span id="board-countdown">--:--:--</span></div>
   </div>
@@ -174,6 +181,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
 
 <!-- Toast 通知 -->
 <div id="toast" style="position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);z-index:10000;background:rgba(30,30,30,0.9);color:#fff;padding:10px 20px;border-radius:12px;font-size:13px;opacity:0;transition:all .3s ease;pointer-events:none;"></div>
+
+<!-- 下拉刷新提示 -->
+<div class="pull-to-refresh" id="pullToRefresh">
+  <div class="spinner"></div>
+  <span>正在更新...</span>
+</div>
+
+<!-- 浮动操作按钮 (快速燃烧) -->
+<button class="fab" id="fabBurn" onclick="scrollToBurn()" style="display:none;">🔥</button>
+
+<!-- 移动端底部导航 -->
+<nav class="mobile-nav" id="mobileNav">
+  <a href="#" class="mobile-nav-item active" onclick="scrollToTop();return false;">
+    <span class="icon">🏠</span>
+    <span>首页</span>
+  </a>
+  <a href="#" class="mobile-nav-item" onclick="scrollToBoard();return false;">
+    <span class="icon">📊</span>
+    <span>榜单</span>
+  </a>
+  <a href="#" class="mobile-nav-item" onclick="scrollToBurn();return false;">
+    <span class="icon">🔥</span>
+    <span>燃烧</span>
+  </a>
+  <a href="#" class="mobile-nav-item" onclick="scrollToRewards();return false;">
+    <span class="icon">💰</span>
+    <span>收益</span>
+  </a>
+</nav>
 
 <!-- 🚀 性能优化: 模块化 JS 加载 -->
 <script src="js/app.js" defer></script>
