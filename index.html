@@ -50,8 +50,9 @@ if ('serviceWorker' in navigator) {
   }
 
   /* 长征背景 贯穿全局 */
-  .global-bg { position:fixed; inset:0; z-index:0; pointer-events:none; will-change:transform; }
-  .global-bg img { width:100%; height:100%; object-fit:cover; opacity:0.75; transform:translateZ(0); }
+  .global-bg { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; will-change:transform; }
+  .global-bg img { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; opacity:0.75; transform:translateZ(0); }
+  .global-bg picture { position:absolute; top:0; left:0; width:100%; height:100%; display:block; }
   .global-bg::after {
     content:''; position:absolute; inset:0;
     background:linear-gradient(180deg, rgba(10,10,10,0.02) 0%, rgba(10,10,10,0.01) 30%, rgba(10,10,10,0.06) 60%, rgba(10,10,10,0.55) 100%);
