@@ -1,71 +1,65 @@
 @echo off
 chcp 65001 >nul
-echo ==========================================
-echo  币安长征 DApp - 图片优化工具
-echo ==========================================
+echo 🚀 币安长征 DApp - 图片优化脚本
+echo ========================================
 echo.
 
-REM 检查 cwebp 是否可用
+REM 检查是否安装了 cwebp
 where cwebp >nul 2>nul
 if %errorlevel% neq 0 (
-    echo [错误] 未找到 cwebp 工具
-    echo 请从 https://developers.google.com/speed/webp/download 下载
-    echo 或将 cwebp.exe 放入系统 PATH
-    pause
-    exit /b 1
-)
-
-REM 创建输出目录
-if not exist "assets" mkdir assets
-
-echo [1/3] 优化桌面端背景图...
-cwebp -q 80 -resize 1200 0 "IMG_20260501_130436.png" -o "assets\bg-optimized.webp"
-if %errorlevel% equ 0 (
-    echo [成功] 桌面端背景图已优化
+    echo ⚠️ 未找到 cwebp，尝试使用 npx...
+    where npx >nul 2>nul
+    if %errorlevel% neq 0 (
+        echo ❌ 错误: 需要安装 libwebp 或 Node.js
+        echo 请访问: https://developers.google.com/speed/webp/download
+        pause
+        exit /b 1
+    )
+    set USE_NPX=1
 ) else (
-    echo [警告] 桌面端优化失败
+    set USE_NPX=0
 )
 
-echo.
-echo [2/3] 优化移动端背景图...
-cwebp -q 75 -resize 768 0 "IMG_20260501_130436.png" -o "assets\bg-mobile.webp"
-if %errorlevel% equ 0 (
-    echo [成功] 移动端背景图已优化
+REM 创建 assets 目录
+if not exist assets mkdir assets
+
+REM 优化桌面背景图
+echo 📷 优化桌面背景图 (1200px宽)...
+if %USE_NPX%==1 (
+    npx @squoosh/cli --webp "{quality:80}" --resize "{width:1200}" IMG_20260501_130436.png -d assets
+    rename assets\IMG_20260501_130436.webp bg-optimized.webp
 ) else (
-    echo [警告] 移动端优化失败
+    cwebp -q 80 -resize 1200 0 IMG_20260501_130436.png -o assets/bg-optimized.webp
 )
 
-echo.
-echo [3/3] 生成 JPEG 回退...
-cwebp -q 85 -resize 1200 0 "IMG_20260501_130436.png" -o "assets\bg-optimized.jpg"
-if %errorlevel% equ 0 (
-    echo [成功] JPEG 回退已生成
+REM 优化移动端背景图
+echo 📷 优化移动端背景图 (640px宽)...
+if %USE_NPX%==1 (
+    npx @squoosh/cli --webp "{quality:75}" --resize "{width:640}" IMG_20260501_130436.png -d assets
+    rename assets\IMG_20260501_130436.webp bg-mobile.webp
 ) else (
-    echo [警告] JPEG 回退生成失败
+    cwebp -q 75 -resize 640 0 IMG_20260501_130436.png -o assets/bg-mobile.webp
+)
+
+REM 生成 JPEG 回退
+echo 📷 生成 JPEG 回退图...
+if %USE_NPX%==1 (
+    npx @squoosh/cli --mozjpeg "{quality:75}" --resize "{width:1200}" IMG_20260501_130436.png -d assets
+    rename assets\IMG_20260501_130436.jpg bg-optimized.jpg
+) else (
+    cwebp -q 75 -resize 1200 0 IMG_20260501_130436.png -o assets/bg-optimized.jpg
 )
 
 echo.
-echo ==========================================
-echo  优化完成！
-echo ==========================================
+echo ✅ 图片优化完成！
 echo.
-
-REM 显示文件大小对比
-echo 文件大小对比:
-echo ------------------------------------------
-for %%F in ("IMG_20260501_130436.png") do set ORIGINAL_SIZE=%%~zF
-for %%F in ("assets\bg-optimized.webp") do set WEBP_SIZE=%%~zF
-for %%F in ("assets\bg-mobile.webp") do set MOBILE_SIZE=%%~zF
-
-echo 原始 PNG:  %ORIGINAL_SIZE% bytes
-echo WebP 桌面: %WEBP_SIZE% bytes
-echo WebP 移动: %MOBILE_SIZE% bytes
+echo 生成文件:
+dir assets\bg-* /b
 echo.
-
-REM 计算压缩率
-set /a SAVED=%ORIGINAL_SIZE% - %WEBP_SIZE%
-set /a RATIO=(%SAVED% * 100) / %ORIGINAL_SIZE%
-echo 节省空间: %SAVED% bytes (%RATIO%%%)
+echo 📊 文件大小对比:
+for %%F in (IMG_20260501_130436.png) do set ORIG_SIZE=%%~zF
+for %%F in (assets\bg-optimized.webp) do set WEBP_SIZE=%%~zF
+echo   原始: %ORIG_SIZE% bytes
+echo   WebP: %WEBP_SIZE% bytes
 echo.
-
 pause

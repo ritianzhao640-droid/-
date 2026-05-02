@@ -31,6 +31,29 @@ const state = {
   rewardCache: {},         // 奖励计算缓存
 };
 
+// ==================== 带超时的链上请求 ====================
+const chainCall = {
+  // 包装链上调用，添加超时
+  async withTimeout(promise, timeoutMs = 10000) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('请求超时')), timeoutMs)
+      )
+    ]);
+  },
+  
+  // 批量调用（带超时）
+  async allWithTimeout(promises, timeoutMs = 10000) {
+    return Promise.race([
+      Promise.all(promises),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('批量请求超时')), timeoutMs)
+      )
+    ]);
+  }
+};
+
 // ==================== 工具函数 ====================
 const utils = {
   // 格式化数字
@@ -153,12 +176,12 @@ const dataLoader = {
     const { vault, burnDistributor, router, token } = state.contracts;
     if (!vault || !burnDistributor) throw new Error('合约未初始化');
 
-    const [totalBurned, ov, dayId, dayDur] = await Promise.all([
+    const [totalBurned, ov, dayId, dayDur] = await chainCall.allWithTimeout([
       burnDistributor.totalActualBurned(),
       vault.overview(),
       burnDistributor.currentDayId(),
       burnDistributor.dayDuration(),
-    ]);
+    ], 15000);
 
     let projectBurned = ethers.BigNumber.from(0);
     try {
@@ -181,8 +204,8 @@ const dataLoader = {
         this.renderRewards(apiData);
       }
 
-      // 链上数据（必须）
-      const chainData = await this.fromChain();
+      // 链上数据（必须，带超时）
+      const chainData = await chainCall.withTimeout(this.fromChain(), 15000);
       this.renderGlobal(chainData);
       
       utils.showToast('数据已同步', 'success');
@@ -265,12 +288,21 @@ const dataLoader = {
   },
 
   // 倒计时
+  countdownTimer: null,
   startCountdown(nextDayEnd) {
+    // 清理旧定时器
+    if (this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+      this.countdownTimer = null;
+    }
+    
     const update = () => {
       const now = Math.floor(Date.now() / 1000);
       const left = nextDayEnd.toNumber() - now;
       if (left <= 0) {
         utils.setText('board-countdown', '结算中');
+        clearInterval(this.countdownTimer);
+        this.countdownTimer = null;
         return;
       }
       const h = String(Math.floor(left / 3600)).padStart(2, '0');
@@ -279,7 +311,7 @@ const dataLoader = {
       utils.setText('board-countdown', `${h}:${m}:${s}`);
     };
     update();
-    setInterval(update, 1000);
+    this.countdownTimer = setInterval(update, 1000);
   },
 
   // 加载日榜
@@ -401,11 +433,11 @@ const userData = {
     if (!state.userAddress) return;
     
     try {
-      const [detail, ov, inv] = await Promise.all([
+      const [detail, ov, inv] = await chainCall.allWithTimeout([
         state.contracts.router.burnUserDetail(VAULT_CONTRACT.address, state.userAddress),
         state.contracts.vault.overview(),
         state.contracts.router.burnInviter(VAULT_CONTRACT.address, state.userAddress),
-      ]);
+      ], 10000);
 
       // 更新 UI
       utils.setText('hero-bacz-pending', utils.fmt(detail.pendingInvite || 0, 4));
@@ -864,19 +896,32 @@ document.addEventListener('touchend', async () => {
 const realtimeUpdater = {
   // 启动实时更新
   start() {
-    // 全周期榜单定期刷新 (15秒)
+    // 防止重复启动
+    this.stop();
+
+    // 🛡️ 页面可见时才启动轮询
+    if (document.hidden) {
+      console.log('[Realtime] 页面不可见，跳过启动');
+      return;
+    }
+
+    // 全周期榜单定期刷新 (30秒，比原来更合理)
     state.updateTimer = setInterval(() => {
-      this.refreshTotalBoard();
+      if (!document.hidden) {
+        this.refreshTotalBoard();
+      }
     }, CONFIG.REFRESH_INTERVAL);
-    
-    // 实时数据更新 (5秒)
+
+    // 实时数据更新 (10秒)
     state.realtimeTimer = setInterval(() => {
-      this.refreshRealtimeData();
+      if (!document.hidden) {
+        this.refreshRealtimeData();
+      }
     }, CONFIG.REALTIME_UPDATE_INTERVAL);
-    
+
     console.log('[Realtime] 实时更新已启动');
   },
-  
+
   // 停止实时更新
   stop() {
     if (state.updateTimer) {
@@ -887,7 +932,26 @@ const realtimeUpdater = {
       clearInterval(state.realtimeTimer);
       state.realtimeTimer = null;
     }
+    // 同时清理倒计时
+    if (dataLoader.countdownTimer) {
+      clearInterval(dataLoader.countdownTimer);
+      dataLoader.countdownTimer = null;
+    }
     console.log('[Realtime] 实时更新已停止');
+  },
+
+  // 🛡️ 页面可见性变化处理
+  handleVisibilityChange() {
+    if (document.hidden) {
+      console.log('[Realtime] 页面隐藏，暂停更新');
+      this.stop();
+    } else {
+      console.log('[Realtime] 页面显示，恢复更新');
+      // 延迟恢复，避免快速切换
+      setTimeout(() => this.start(), 500);
+      // 刷新数据
+      setTimeout(() => dataLoader.loadGlobal().catch(console.error), 1000);
+    }
   },
   
   // 刷新全周期榜单
@@ -896,11 +960,11 @@ const realtimeUpdater = {
       const indicator = document.querySelector('.update-indicator');
       if (indicator) indicator.classList.add('updating');
       
-      // 获取最新数据
-      const [totalBurned, ov] = await Promise.all([
+      // 获取最新数据（带超时）
+      const [totalBurned, ov] = await chainCall.allWithTimeout([
         state.contracts.burnDistributor.totalActualBurned(),
         state.contracts.vault.overview(),
-      ]);
+      ], 10000);
       
       // 更新全周期数据
       const globalDisplay = totalBurned.add(state.projectBurned || 0);
@@ -936,8 +1000,11 @@ const realtimeUpdater = {
     try {
       if (!state.currentDayId) return;
       
-      // 获取最新日榜数据
-      const bd = await state.contracts.router.burnDay(VAULT_CONTRACT.address, state.currentDayId);
+      // 获取最新日榜数据（带超时）
+      const bd = await chainCall.withTimeout(
+        state.contracts.router.burnDay(VAULT_CONTRACT.address, state.currentDayId),
+        10000
+      );
       
       // 计算并显示预计奖励
       this.calculateEstimatedRewards(bd);
@@ -1040,21 +1107,25 @@ window.addEventListener('DOMContentLoaded', async () => {
   // 初始化合约
   contracts.initRead();
   
-  // 加载数据
-  await dataLoader.loadGlobal();
+  // 加载数据（带错误处理）
+  try {
+    await dataLoader.loadGlobal();
+  } catch (e) {
+    console.error('初始数据加载失败:', e);
+    utils.showToast('数据加载失败，请检查网络连接', 'error');
+  }
   
   // 启动实时更新
   realtimeUpdater.start();
   
-  // 页面可见性变化处理
+  // 🛡️ 页面可见性变化处理（使用 realtimeUpdater 的统一处理）
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      realtimeUpdater.stop();
-    } else {
-      realtimeUpdater.start();
-      // 重新加载数据
-      dataLoader.loadGlobal();
-    }
+    realtimeUpdater.handleVisibilityChange();
+  });
+  
+  // 页面卸载时清理所有资源
+  window.addEventListener('beforeunload', () => {
+    realtimeUpdater.stop();
   });
 });
 

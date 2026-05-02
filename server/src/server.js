@@ -15,7 +15,25 @@ const { runSync } = require('./chain-sync');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
-const REFRESH_INTERVAL = parseInt(process.env.CACHE_REFRESH_INTERVAL, 10) || 300; // 秒
+const REFRESH_INTERVAL = parseInt(process.env.CACHE_REFRESH_INTERVAL, 10) || 180; // 秒，默认3分钟
+
+// 🛡️ 多 RPC 节点配置（故障自动切换）
+const RPC_URLS = (process.env.BSC_RPC_URL || 'https://bsc-dataseed.binance.org/')
+  .split(',')
+  .map(url => url.trim())
+  .filter(url => url.length > 0);
+
+let currentRpcIndex = 0;
+
+// 🛡️ 获取可用 RPC 节点
+function getNextRpcUrl() {
+  const url = RPC_URLS[currentRpcIndex];
+  currentRpcIndex = (currentRpcIndex + 1) % RPC_URLS.length;
+  return url;
+}
+
+// 🛡️ 导出给 chain-sync 使用
+module.exports.getNextRpcUrl = getNextRpcUrl;
 
 // 项目根目录（静态文件所在目录）
 const path = require('path');
@@ -108,11 +126,24 @@ app.get('/api/all', (req, res) => {
   });
 });
 
-// 静态文件服务（API 路由之后，404 之前）
+// 🛡️ 静态文件服务（API 路由之后，404 之前）
+const staticMaxAge = parseInt(process.env.STATIC_MAX_AGE, 10) || 86400; // 默认1天
 app.use(express.static(projectRoot, {
   index: 'index.html',
   dotfiles: 'ignore',
-  maxAge: '30d'
+  maxAge: staticMaxAge * 1000,
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, path) => {
+    // 对图片和字体文件设置长期缓存
+    if (path.match(/\.(webp|png|jpg|jpeg|gif|woff2|woff|ttf)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=2592000'); // 30天
+    }
+    // 对 CSS/JS 设置中等缓存
+    if (path.match(/\.(css|js)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // 1天
+    }
+  }
 }));
 
 // 首页兜底
@@ -125,10 +156,25 @@ app.use((req, res) => {
   res.status(404).json({ error: '接口不存在', path: req.path });
 });
 
-// 错误处理
+// 🛡️ 错误处理
 app.use((err, req, res, next) => {
   console.error('[Server] 错误:', err);
-  res.status(500).json({ error: '服务器内部错误', message: err.message });
+  // 区分错误类型
+  if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
+    res.status(503).json({
+      error: '网络连接超时',
+      message: '区块链节点连接失败，请稍后重试',
+      retryAfter: 5
+    });
+  } else if (err.message && err.message.includes('timeout')) {
+    res.status(504).json({
+      error: '请求超时',
+      message: '数据获取超时，请稍后重试',
+      retryAfter: 3
+    });
+  } else {
+    res.status(500).json({ error: '服务器内部错误', message: err.message });
+  }
 });
 
 // ==================== 定时任务 ====================

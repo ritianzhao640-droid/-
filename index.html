@@ -4,10 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>币安长征</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+<!-- 🚀 性能优化: 预连接和预加载 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+<!-- 字体异步加载 -->
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" as="style">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet"></noscript>
+
 <!-- 📋 contracts.js 包含所有合约地址、ABI 和网络配置 — 新代币发布时优先替换此文件 -->
-<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-<script src="contracts.js?v=6"></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" defer></script>
+<script src="contracts.js?v=7" defer></script>
 <style>
   :root {
     --ink-900: #0a0a0a; --ink-800: #111111; --ink-700: #1a1a1a; --ink-600: #262626; --ink-500: #3a3a3a;
@@ -552,6 +561,57 @@
   #loadingBar { position:fixed; top:0; left:0; height:2.5px; background:linear-gradient(90deg, #3d8b6f, #c67b3c); z-index:9999; width:0%; transition:width 0.3s ease, opacity 0.3s ease; opacity:0; }
   #loadingBar.visible { opacity:1; }
 
+  /* ===== 骨架屏加载动画 ===== */
+  .skeleton-screen {
+    position: fixed; inset: 0; z-index: 9998;
+    background: #f0ebe0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    transition: opacity 0.4s ease;
+  }
+  .skeleton-screen.hidden { opacity: 0; pointer-events: none; }
+  .skeleton-logo {
+    width: 80px; height: 80px;
+    border-radius: 20px;
+    background: linear-gradient(90deg, rgba(61,139,111,0.1) 25%, rgba(61,139,111,0.2) 50%, rgba(61,139,111,0.1) 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+    margin-bottom: 20px;
+  }
+  .skeleton-text {
+    width: 200px; height: 20px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.05) 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+    margin-bottom: 12px;
+  }
+  .skeleton-text.short { width: 120px; }
+  @keyframes skeletonShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ===== 错误提示遮罩 ===== */
+  .error-overlay {
+    position: fixed; inset: 0; z-index: 10000;
+    background: rgba(240, 235, 224, 0.95);
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .error-overlay.visible { display: flex; }
+  .error-icon { font-size: 48px; margin-bottom: 16px; }
+  .error-title { font-size: 18px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+  .error-desc { font-size: 14px; color: rgba(30,30,30,0.7); text-align: center; margin-bottom: 20px; line-height: 1.5; }
+  .error-btn {
+    padding: 12px 24px; border-radius: 12px;
+    background: #3d8b6f; color: #fff;
+    border: none; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .error-btn:hover { background: #2d6b52; transform: translateY(-1px); }
+
   /* ===== 数字滚动动画 ===== */
   .num-roll { display:inline-block; animation:numPop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
   @keyframes numPop { from{transform:scale(0.8);opacity:0;} to{transform:scale(1);opacity:1;} }
@@ -601,9 +661,29 @@
 <!-- 顶部加载进度条 -->
 <div id="loadingBar"></div>
 
+<!-- 🚀 骨架屏（首屏加载时显示） -->
+<div class="skeleton-screen" id="skeletonScreen">
+  <div class="skeleton-logo"></div>
+  <div class="skeleton-text"></div>
+  <div class="skeleton-text short"></div>
+</div>
+
+<!-- 🛡️ 错误遮罩（加载失败时显示） -->
+<div class="error-overlay" id="errorOverlay">
+  <div class="error-icon">📡</div>
+  <div class="error-title">网络连接异常</div>
+  <div class="error-desc">无法连接到区块链网络，请检查网络后重试</div>
+  <button class="error-btn" onclick="location.reload()">刷新页面</button>
+</div>
+
 <!-- 长征背景 贯穿全局 -->
 <div class="global-bg">
-  <img src="IMG_20260501_130436.png" alt="长征">
+  <picture>
+    <source srcset="assets/bg-optimized.webp" type="image/webp" media="(min-width: 641px)">
+    <source srcset="assets/bg-mobile.webp" type="image/webp" media="(max-width: 640px)">
+    <source srcset="assets/bg-optimized.jpg" type="image/jpeg" media="(min-width: 641px)">
+    <img src="IMG_20260501_130436.png" alt="长征" loading="lazy" decoding="async">
+  </picture>
 </div>
 
 <!-- Toast 容器 -->
@@ -982,6 +1062,53 @@ let provider, signer, userAddress;
 let token, vault, burnDistributor, router;
 let readProvider;
 let walletConnected = false;
+
+// 🛡️ 错误恢复和超时配置
+const TIMEOUT_CONFIG = {
+  chainRequest: 12000,    // 链上请求超时 12秒
+  apiRequest: 8000,       // API请求超时 8秒
+  retryCount: 2,          // 失败重试次数
+  retryDelay: 1000,       // 重试间隔 1秒
+};
+
+// 🛡️ 带超时的 Promise 包装器
+function withTimeout(promise, ms, errorMsg = '请求超时') {
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error(errorMsg)), ms)
+  );
+  return Promise.race([promise, timeout]);
+}
+
+// 🛡️ 带重试的异步函数
+async function withRetry(fn, retries = TIMEOUT_CONFIG.retryCount, delay = TIMEOUT_CONFIG.retryDelay) {
+  let lastError;
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      lastError = e;
+      if (i < retries) {
+        console.warn(`[Retry] 第${i + 1}次重试...`, e.message);
+        await new Promise(r => setTimeout(r, delay * (i + 1)));
+      }
+    }
+  }
+  throw lastError;
+}
+
+// 🛡️ 全局错误处理
+window.addEventListener('error', (e) => {
+  console.error('[Global Error]', e.error);
+  showToast('页面出现错误，正在恢复...', 'warn');
+  // 尝试恢复数据加载
+  setTimeout(() => loadGlobalData().catch(console.error), 2000);
+});
+
+window.addEventListener('unhandledrejection', (e) => {
+  console.error('[Unhandled Promise]', e.reason);
+  e.preventDefault();
+  showToast('数据加载异常，请刷新页面', 'error');
+});
 // 📋 数据来源：项目方设定 — 新代币发布时需确认是否调整
 const BURN_GOAL = ethers.utils.parseUnits('1000000000', 18);
 const MILESTONE_STEP = ethers.utils.parseUnits('10000000', 18);
@@ -1034,9 +1161,33 @@ function showLoading(pct) {
 }
 function hideLoading() {
   const bar = document.getElementById('loadingBar');
-  if (!bar) return;
-  bar.style.width = '100%';
-  setTimeout(() => { bar.classList.remove('visible'); bar.style.width = '0%'; }, 300);
+  const skeleton = document.getElementById('skeletonScreen');
+  if (bar) {
+    bar.style.width = '100%';
+    setTimeout(() => { bar.classList.remove('visible'); bar.style.width = '0%'; }, 300);
+  }
+  // 隐藏骨架屏
+  if (skeleton) {
+    skeleton.classList.add('hidden');
+    setTimeout(() => skeleton.style.display = 'none', 400);
+  }
+}
+
+// 🛡️ 显示错误遮罩
+function showErrorOverlay(title, desc) {
+  const overlay = document.getElementById('errorOverlay');
+  if (!overlay) return;
+  const titleEl = overlay.querySelector('.error-title');
+  const descEl = overlay.querySelector('.error-desc');
+  if (titleEl) titleEl.textContent = title || '加载失败';
+  if (descEl) descEl.textContent = desc || '请检查网络连接后重试';
+  overlay.classList.add('visible');
+}
+
+// 🛡️ 隐藏错误遮罩
+function hideErrorOverlay() {
+  const overlay = document.getElementById('errorOverlay');
+  if (overlay) overlay.classList.remove('visible');
 }
 function setSkeleton(id, width, height) {
   const el = document.getElementById(id);
@@ -1205,20 +1356,24 @@ function renderHistoryBoardsFromAPI(history) {
 
 // ============ 读取全局公开数据（链上直连，API 失败时回退） ============
 async function loadGlobalData() {
-  // 优先尝试 API
-  try {
-    const ok = await loadGlobalDataFromAPI();
-    if (ok) { showToast('数据已同步', 'success'); return; }
-  } catch (e) { console.warn('[API] 加载失败，回退到链上:', e.message); }
+  showLoading(10);
 
-  // API 失败，回退到链上调用
+  // 🛡️ 优先尝试 API（带超时和重试）
+  try {
+    const ok = await withTimeout(loadGlobalDataFromAPI(), TIMEOUT_CONFIG.apiRequest, 'API请求超时');
+    if (ok) { showToast('数据已同步', 'success'); hideLoading(); return; }
+  } catch (e) {
+    console.warn('[API] 加载失败，回退到链上:', e.message);
+  }
+
+  // API 失败，回退到链上调用（带超时和重试）
   showToast('正在直连链上获取数据...', 'info');
   try {
     const [totalBurned, ov, dayId, dayDur] = await Promise.all([
-      burnDistributor.totalActualBurned(),
-      vault.overview(),
-      burnDistributor.currentDayId(),
-      burnDistributor.dayDuration(),
+      withRetry(() => withTimeout(burnDistributor.totalActualBurned(), TIMEOUT_CONFIG.chainRequest), 1),
+      withRetry(() => withTimeout(vault.overview(), TIMEOUT_CONFIG.chainRequest), 1),
+      withRetry(() => withTimeout(burnDistributor.currentDayId(), TIMEOUT_CONFIG.chainRequest), 1),
+      withRetry(() => withTimeout(burnDistributor.dayDuration(), TIMEOUT_CONFIG.chainRequest), 1),
     ]);
 
     // 项目方燃烧 = 代币合约自身持有量
@@ -1268,10 +1423,11 @@ async function loadGlobalData() {
     const displayRound = dayId.sub(20573).toString();
     setText('board-day-id', displayRound);
 
-    // 倒计时
+    // 倒计时（清理旧定时器）
     const nextDayEnd = dayId.add(1).mul(dayDur);
+    if (window._countdownTimer) clearInterval(window._countdownTimer);
     updateCountdown(nextDayEnd);
-    setInterval(() => updateCountdown(nextDayEnd), 1000);
+    window._countdownTimer = setInterval(() => updateCountdown(nextDayEnd), 1000);
 
     // 加载日榜
     await loadDailyBoard(dayId);
@@ -1465,10 +1621,15 @@ async function loadRewardRankings() {
 async function loadUserData() {
   if (!userAddress) return;
   try {
+    const chainTimeout = (promise, ms = 10000) => Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('链上请求超时')), ms))
+    ]);
+    
     const [detail, ov, inv] = await Promise.all([
-      router.burnUserDetail(VAULT_CONTRACT.address, userAddress),
-      vault.overview(),
-      router.burnInviter(VAULT_CONTRACT.address, userAddress),
+      chainTimeout(router.burnUserDetail(VAULT_CONTRACT.address, userAddress)),
+      chainTimeout(vault.overview()),
+      chainTimeout(router.burnInviter(VAULT_CONTRACT.address, userAddress)),
     ]);
 
     // Hero
@@ -1781,29 +1942,103 @@ function checkSelfInvite() {
   }
 }
 
-// ============ 启动 ============
+// 🛡️ 启动（带错误恢复）
 window.addEventListener('DOMContentLoaded', async () => {
+  console.log('[App] 启动中...');
+
   // 解析 URL 邀请参数
   const urlRef = resolveRefFromUrl();
   if (urlRef) {
-    // 通过邀请链接进入 → 锁定该邀请人
     localStorage.setItem('bacz_ref', urlRef);
     localStorage.setItem('bacz_ref_locked', '1');
     console.log('Invite ref resolved (locked):', urlRef);
-    // 显示邀请来源提示
     setTimeout(() => {
       showToast('您通过 ' + shortAddr(urlRef) + ' 的邀请链接进入', 'info');
     }, 800);
   } else {
-    // 直接访问官网（无 ref 参数）→ 清除之前的锁定状态
     localStorage.removeItem('bacz_ref_locked');
     localStorage.removeItem('bacz_ref');
     console.log('Direct access: cleared locked ref');
   }
 
-  initReadContracts();
-  await loadGlobalData();
+  // 🛡️ 初始化合约（带错误处理）
+  try {
+    initReadContracts();
+  } catch (e) {
+    console.error('[Init] 合约初始化失败:', e);
+    showToast('网络连接失败，请检查网络后刷新', 'error');
+    return;
+  }
+
+  // 🛡️ 加载数据（带超时保护）
+  try {
+    await withTimeout(loadGlobalData(), 30000, '页面加载超时，请刷新重试');
+    hideLoading(); // 成功加载后隐藏骨架屏
+  } catch (e) {
+    console.error('[Init] 数据加载失败:', e);
+    hideLoading();
+    // 根据错误类型显示不同提示
+    if (e.message.includes('超时')) {
+      showErrorOverlay('加载超时', '网络连接较慢，请检查网络后刷新');
+    } else if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
+      showErrorOverlay('网络断开', '无法连接到服务器，请检查网络后刷新');
+    } else {
+      showErrorOverlay('数据加载失败', e.message || '请刷新页面重试');
+    }
+    // 显示降级内容
+    setText('global-burned', '—');
+    setText('board-countdown', '—');
+  }
 });
+
+// 页面卸载时清理定时器
+window.addEventListener('beforeunload', () => {
+  if (window._countdownInterval) clearInterval(window._countdownInterval);
+  if (window._countdownTimer) clearInterval(window._countdownTimer);
+});
+
+// 🛡️ 页面可见性变化处理（智能轮询控制）
+let _visibilityTimeout;
+let _isPageVisible = true;
+let _pollingInterval = null;
+
+document.addEventListener('visibilitychange', () => {
+  if (_visibilityTimeout) clearTimeout(_visibilityTimeout);
+
+  if (document.hidden) {
+    _isPageVisible = false;
+    // 页面隐藏时：清理所有定时器，停止轮询
+    if (window._countdownInterval) { clearInterval(window._countdownInterval); window._countdownInterval = null; }
+    if (window._countdownTimer) { clearInterval(window._countdownTimer); window._countdownTimer = null; }
+    if (_pollingInterval) { clearInterval(_pollingInterval); _pollingInterval = null; }
+    console.log('[Visibility] 页面隐藏，暂停轮询');
+  } else {
+    _isPageVisible = true;
+    // 页面显示时：延迟恢复数据刷新
+    _visibilityTimeout = setTimeout(() => {
+      console.log('[Visibility] 页面显示，恢复数据刷新');
+      loadGlobalData().catch(console.error);
+      startSmartPolling(); // 恢复智能轮询
+    }, 500);
+  }
+});
+
+// 🛡️ 智能轮询：仅在页面可见时执行
+function startSmartPolling() {
+  if (_pollingInterval) clearInterval(_pollingInterval);
+  if (!_isPageVisible) return;
+
+  // 每30秒刷新一次数据（比原来的5秒+15秒更合理）
+  _pollingInterval = setInterval(() => {
+    if (_isPageVisible) {
+      console.log('[SmartPolling] 定时刷新数据');
+      loadGlobalData().catch(e => console.warn('[SmartPolling] 刷新失败:', e.message));
+    }
+  }, 30000);
+}
+
+// 启动时开始智能轮询
+startSmartPolling();
 
 </script>
 </body>
