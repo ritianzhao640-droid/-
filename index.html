@@ -1073,8 +1073,8 @@ async function loadGlobalData() {
     await loadDailyBoard(dayId);
     await loadHistoryBoards(dayId.toNumber());
 
-    // 加载奖励排名
-    await loadRewardRankings(dayId.toNumber());
+    // 加载奖励排名（读取本地静态数据）
+    await loadRewardRankings();
 
     // 社区数据
     setText('community-daily-burn', fmtInt(globalDisplay));
@@ -1182,82 +1182,18 @@ async function loadHistoryBoards(currentDayId) {
   }
 }
 
-// ============ 奖励排名 ============
-async function loadRewardRankings(currentDayId) {
+// ============ 奖励排名（读取本地静态数据） ============
+async function loadRewardRankings() {
   try {
-    // 只查最近7期，避免RPC超时
-    const allDays = [];
-    const startDay = Math.max(0, currentDayId - 7);
-    for (let d = currentDayId - 1; d >= startDay; d--) {
-      allDays.push(d);
-    }
+    const res = await fetch('rewards-data.json?v=' + Date.now());
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
 
-    const dailyMap = {};
-    const totalMap = {};
-
-    // 获取 rankBps 比例表 (万分比)
-    let rankBpsTable = [];
-    try {
-      rankBpsTable = await router.rankBpsTable();
-    } catch (e) {
-      rankBpsTable = [2500, 2000, 1500, 1000, 800, 600, 500, 400, 300, 200];
-    }
-
-    // 1. 拉取历史日榜数据（最近7期）
-    for (const dayId of allDays) {
-      try {
-        const bd = await router.burnDay(VAULT_CONTRACT.address, dayId);
-        if (bd.participantCount.toNumber() === 0) continue;
-
-        const rewardPot = bd.rewardPot;
-        if (!rewardPot || rewardPot.eq(0)) continue;
-
-        for (let i = 0; i < 10; i++) {
-          const addr = bd.users[i];
-          if (!addr || addr === ethers.constants.AddressZero) continue;
-
-          const bps = rankBpsTable[i] || 0;
-          if (bps === 0) continue;
-
-          const share = rewardPot.mul(bps).div(10000);
-
-          if (!dailyMap[addr]) dailyMap[addr] = ethers.BigNumber.from(0);
-          dailyMap[addr] = dailyMap[addr].add(share);
-        }
-      } catch (e) {
-        // 忽略单期错误
-      }
-    }
-
-    // 2. 总榜：用日榜地址去查 pendingBurnReward（未领取）
-    const burnContract = burnDistributor || new ethers.Contract(BURN_CONTRACT.address, BURN_CONTRACT.abi, readProvider);
-    const dailyAddrs = Object.keys(dailyMap);
-
-    // 分批查 pending，每批5个地址避免并发过高
-    if (dailyAddrs.length > 0) {
-      const batchSize = 5;
-      for (let i = 0; i < dailyAddrs.length; i += batchSize) {
-        const batch = dailyAddrs.slice(i, i + batchSize);
-        const results = await Promise.all(
-          batch.map(addr => burnContract.pendingBurnReward(addr).catch(() => ethers.BigNumber.from(0)))
-        );
-        batch.forEach((addr, idx) => {
-          if (!totalMap[addr]) totalMap[addr] = ethers.BigNumber.from(0);
-          totalMap[addr] = totalMap[addr].add(results[idx]);
-        });
-      }
-    }
-
-    // 3. 排序并渲染日榜排名
-    const dailySorted = Object.entries(dailyMap)
-      .map(([addr, amt]) => ({ addr, amt }))
-      .sort((a, b) => (b.amt.gt(a.amt) ? 1 : -1))
-      .slice(0, 10);
-
+    // 渲染日榜
     const dailyList = document.getElementById('rewards-daily-list');
-    if (dailyList) {
+    if (dailyList && data.dailyRank) {
       let html = '';
-      dailySorted.forEach((item, i) => {
+      data.dailyRank.forEach((item, i) => {
         const rankClass = i === 0 ? 'row top1' : 'row';
         const rankStyle = i === 1 ? 'style="background:linear-gradient(135deg,#c0c0c0,#a0a0a0);color:#111;"' :
                           i === 2 ? 'style="background:linear-gradient(135deg,#cd7f32,#a06020);color:#1a1005;"' : '';
@@ -1271,7 +1207,7 @@ async function loadRewardRankings(currentDayId) {
             </div>
           </div>
           <div class="right">
-            <div class="v" style="color:#3d8b6f;">${fmt(item.amt, 4)}</div>
+            <div class="v" style="color:#3d8b6f;">${item.amtFmt}</div>
             <div class="small muted">slisBNB</div>
           </div>
         </div>`;
@@ -1279,16 +1215,11 @@ async function loadRewardRankings(currentDayId) {
       dailyList.innerHTML = html || '<div class="row" style="opacity:0.5;"><div class="row-left">暂无数据</div></div>';
     }
 
-    // 4. 排序并渲染总榜排名
-    const totalSorted = Object.entries(totalMap)
-      .map(([addr, amt]) => ({ addr, amt }))
-      .sort((a, b) => (b.amt.gt(a.amt) ? 1 : -1))
-      .slice(0, 10);
-
+    // 渲染总榜
     const totalList = document.getElementById('rewards-total-list');
-    if (totalList) {
+    if (totalList && data.totalRank) {
       let html = '';
-      totalSorted.forEach((item, i) => {
+      data.totalRank.forEach((item, i) => {
         const rankClass = i === 0 ? 'row top1' : 'row';
         const rankStyle = i === 1 ? 'style="background:linear-gradient(135deg,#c0c0c0,#a0a0a0);color:#111;"' :
                           i === 2 ? 'style="background:linear-gradient(135deg,#cd7f32,#a06020);color:#1a1005;"' : '';
@@ -1302,15 +1233,24 @@ async function loadRewardRankings(currentDayId) {
             </div>
           </div>
           <div class="right">
-            <div class="v" style="color:#a06028;">${fmt(item.amt, 4)}</div>
+            <div class="v" style="color:#a06028;">${item.amtFmt}</div>
             <div class="small muted">slisBNB</div>
           </div>
         </div>`;
       });
       totalList.innerHTML = html || '<div class="row" style="opacity:0.5;"><div class="row-left">暂无数据</div></div>';
     }
+
+    // 显示更新时间
+    if (data.updatedAt) {
+      const date = new Date(data.updatedAt);
+      const timeStr = date.toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      console.log('奖励数据更新时间:', timeStr);
+    }
   } catch (e) {
     console.error('loadRewardRankings', e);
+    document.getElementById('rewards-daily-list').innerHTML = '<div class="row" style="opacity:0.5;"><div class="row-left">数据加载失败</div></div>';
+    document.getElementById('rewards-total-list').innerHTML = '<div class="row" style="opacity:0.5;"><div class="row-left">数据加载失败</div></div>';
   }
 }
 
