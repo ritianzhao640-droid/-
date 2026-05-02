@@ -1185,9 +1185,9 @@ async function loadHistoryBoards(currentDayId) {
 // ============ 奖励排名 ============
 async function loadRewardRankings(currentDayId) {
   try {
-    // 只查最近30期，避免RPC超时
+    // 只查最近7期，避免RPC超时
     const allDays = [];
-    const startDay = Math.max(0, currentDayId - 30);
+    const startDay = Math.max(0, currentDayId - 7);
     for (let d = currentDayId - 1; d >= startDay; d--) {
       allDays.push(d);
     }
@@ -1203,7 +1203,7 @@ async function loadRewardRankings(currentDayId) {
       rankBpsTable = [2500, 2000, 1500, 1000, 800, 600, 500, 400, 300, 200];
     }
 
-    // 1. 拉取历史日榜数据（最近30期）
+    // 1. 拉取历史日榜数据（最近7期）
     for (const dayId of allDays) {
       try {
         const bd = await router.burnDay(VAULT_CONTRACT.address, dayId);
@@ -1229,49 +1229,26 @@ async function loadRewardRankings(currentDayId) {
       }
     }
 
-    // 2. 总榜：用日榜地址去查 pendingBurnReward（未领取 = 当前总榜累积）
-    // 同时查这些地址的已领取（分块查事件避免超时）
+    // 2. 总榜：用日榜地址去查 pendingBurnReward（未领取）
     const burnContract = burnDistributor || new ethers.Contract(BURN_CONTRACT.address, BURN_CONTRACT.abi, readProvider);
     const dailyAddrs = Object.keys(dailyMap);
 
-    // 先查所有日榜地址的 pendingBurnReward（未领取）
+    // 分批查 pending，每批5个地址避免并发过高
     if (dailyAddrs.length > 0) {
-      const pendingResults = await Promise.all(
-        dailyAddrs.map(addr =>
-          burnContract.pendingBurnReward(addr).catch(() => ethers.BigNumber.from(0))
-        )
-      );
-      dailyAddrs.forEach((addr, i) => {
-        if (!totalMap[addr]) totalMap[addr] = ethers.BigNumber.from(0);
-        totalMap[addr] = totalMap[addr].add(pendingResults[i]);
-      });
-    }
-
-    // 再查已领取的事件（分3块查，每块约15000区块 ≈ 12小时）
-    try {
-      const latestBlock = await readProvider.getBlockNumber();
-      const blockStep = 15000;
-      const filter = burnContract.filters.BurnRewardClaimed();
-
-      for (let start = Math.max(0, latestBlock - blockStep * 3); start <= latestBlock; start += blockStep) {
-        const end = Math.min(start + blockStep, latestBlock);
-        try {
-          const events = await burnContract.queryFilter(filter, start, end);
-          for (const ev of events) {
-            const addr = ev.args.user;
-            const amt = ev.args.amount;
-            if (!totalMap[addr]) totalMap[addr] = ethers.BigNumber.from(0);
-            totalMap[addr] = totalMap[addr].add(amt);
-          }
-        } catch (e) {
-          // 单块查询失败继续
-        }
+      const batchSize = 5;
+      for (let i = 0; i < dailyAddrs.length; i += batchSize) {
+        const batch = dailyAddrs.slice(i, i + batchSize);
+        const results = await Promise.all(
+          batch.map(addr => burnContract.pendingBurnReward(addr).catch(() => ethers.BigNumber.from(0)))
+        );
+        batch.forEach((addr, idx) => {
+          if (!totalMap[addr]) totalMap[addr] = ethers.BigNumber.from(0);
+          totalMap[addr] = totalMap[addr].add(results[idx]);
+        });
       }
-    } catch (e) {
-      console.error('query BurnRewardClaimed events', e);
     }
 
-    // 4. 排序并渲染日榜排名
+    // 3. 排序并渲染日榜排名
     const dailySorted = Object.entries(dailyMap)
       .map(([addr, amt]) => ({ addr, amt }))
       .sort((a, b) => (b.amt.gt(a.amt) ? 1 : -1))
@@ -1302,7 +1279,7 @@ async function loadRewardRankings(currentDayId) {
       dailyList.innerHTML = html || '<div class="row" style="opacity:0.5;"><div class="row-left">暂无数据</div></div>';
     }
 
-    // 5. 排序并渲染总榜排名
+    // 4. 排序并渲染总榜排名
     const totalSorted = Object.entries(totalMap)
       .map(([addr, amt]) => ({ addr, amt }))
       .sort((a, b) => (b.amt.gt(a.amt) ? 1 : -1))
