@@ -93,6 +93,15 @@
   .contract-copy:hover { background:rgba(255,255,255,0.75); color:#1a1a1a; }
   .contract-copy:active { transform:scale(0.92); }
 
+  /* ===== 奖励排名并排布局 ===== */
+  .rewards-grid {
+    display:grid; grid-template-columns:1fr 1fr; gap:12px;
+  }
+  .rewards-col .list { margin-top:0; }
+  @media (max-width:400px) {
+    .rewards-grid { grid-template-columns:1fr; }
+  }
+
   /* ===== 数据概览（水墨毛玻璃胶囊卡片 2行3列） ===== */
   .alloc {
     display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:16px;
@@ -753,21 +762,22 @@
   <div class="page" id="page-rewards">
     <div class="section">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <div class="title" style="margin:0;">日榜销毁奖励排名</div>
+        <div class="title" style="margin:0;">销毁奖励排名</div>
         <div style="font-size:11px; color:rgba(30,30,30,0.55);">全周期累积</div>
       </div>
-      <div class="list" id="rewards-daily-list">
-        <div class="row" style="opacity:0.5;"><div class="row-left">加载中…</div></div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <div class="title" style="margin:0;">总榜销毁奖励排名</div>
-        <div style="font-size:11px; color:rgba(30,30,30,0.55);">全周期累积</div>
-      </div>
-      <div class="list" id="rewards-total-list">
-        <div class="row" style="opacity:0.5;"><div class="row-left">加载中…</div></div>
+      <div class="rewards-grid">
+        <div class="rewards-col">
+          <div style="font-size:12px; font-weight:600; color:#3d8b6f; margin-bottom:10px; text-align:center;">日榜累积 slisBNB</div>
+          <div class="list" id="rewards-daily-list">
+            <div class="row" style="opacity:0.5;"><div class="row-left">加载中…</div></div>
+          </div>
+        </div>
+        <div class="rewards-col">
+          <div style="font-size:12px; font-weight:600; color:#a06028; margin-bottom:10px; text-align:center;">总榜累积 slisBNB</div>
+          <div class="list" id="rewards-total-list">
+            <div class="row" style="opacity:0.5;"><div class="row-left">加载中…</div></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1219,34 +1229,46 @@ async function loadRewardRankings(currentDayId) {
       }
     }
 
-    // 2. 拉取 BurnRewardClaimed 事件（最近5000个区块，约4小时）
+    // 2. 总榜：用日榜地址去查 pendingBurnReward（未领取 = 当前总榜累积）
+    // 同时查这些地址的已领取（分块查事件避免超时）
     const burnContract = burnDistributor || new ethers.Contract(BURN_CONTRACT.address, BURN_CONTRACT.abi, readProvider);
-    try {
-      const latestBlock = await readProvider.getBlockNumber();
-      const fromBlock = Math.max(0, latestBlock - 5000);
-      const filter = burnContract.filters.BurnRewardClaimed();
-      const events = await burnContract.queryFilter(filter, fromBlock, latestBlock);
-      for (const ev of events) {
-        const addr = ev.args.user;
-        const amt = ev.args.amount;
-        if (!totalMap[addr]) totalMap[addr] = ethers.BigNumber.from(0);
-        totalMap[addr] = totalMap[addr].add(amt);
-      }
-    } catch (e) {
-      console.error('query BurnRewardClaimed events', e);
-    }
+    const dailyAddrs = Object.keys(dailyMap);
 
-    // 3. 查每个地址当前 pendingBurnReward（未领取）
-    const allAddrs = Object.keys(totalMap);
-    if (allAddrs.length > 0) {
+    // 先查所有日榜地址的 pendingBurnReward（未领取）
+    if (dailyAddrs.length > 0) {
       const pendingResults = await Promise.all(
-        allAddrs.map(addr =>
+        dailyAddrs.map(addr =>
           burnContract.pendingBurnReward(addr).catch(() => ethers.BigNumber.from(0))
         )
       );
-      allAddrs.forEach((addr, i) => {
+      dailyAddrs.forEach((addr, i) => {
+        if (!totalMap[addr]) totalMap[addr] = ethers.BigNumber.from(0);
         totalMap[addr] = totalMap[addr].add(pendingResults[i]);
       });
+    }
+
+    // 再查已领取的事件（分3块查，每块约15000区块 ≈ 12小时）
+    try {
+      const latestBlock = await readProvider.getBlockNumber();
+      const blockStep = 15000;
+      const filter = burnContract.filters.BurnRewardClaimed();
+
+      for (let start = Math.max(0, latestBlock - blockStep * 3); start <= latestBlock; start += blockStep) {
+        const end = Math.min(start + blockStep, latestBlock);
+        try {
+          const events = await burnContract.queryFilter(filter, start, end);
+          for (const ev of events) {
+            const addr = ev.args.user;
+            const amt = ev.args.amount;
+            if (!totalMap[addr]) totalMap[addr] = ethers.BigNumber.from(0);
+            totalMap[addr] = totalMap[addr].add(amt);
+          }
+        } catch (e) {
+          // 单块查询失败继续
+        }
+      }
+    } catch (e) {
+      console.error('query BurnRewardClaimed events', e);
     }
 
     // 4. 排序并渲染日榜排名
